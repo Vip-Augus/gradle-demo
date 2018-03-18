@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gradle.demo.dao.CheckInMapper">
+    <resultMap id="BaseResultMap" type="gradle.demo.model.CheckInRecord" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="id_number" property="idNumber" jdbcType="VARCHAR" />
+        <result column="user_id" property="userId" jdbcType="INTEGER" />
+        <result column="ep_id" property="epId" jdbcType="INTEGER" />
+        <result column="ep_record_id" property="epRecordId" jdbcType="INTEGER"/>
+        <result column="time" property="time" jdbcType="VARCHAR" />
+        <result column="create_date" property="createDate" jdbcType="VARCHAR" />
+        <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, id_number, user_id, ep_id,
+        ep_record_id, time, create_date, modify_date
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />
+        from check_in_record
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectByIdNumberAndEpRecordIds" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM check_in_record
+        WHERE id_number = #{idNumber, jdbcType=VARCHAR}
+        AND ep_record_id IN
+        <foreach collection="epRecordIds" item="epRecordId" index="index" open="(" separator="," close=")">
+            #{epRecordId, jdbcType=INTEGER}
+        </foreach>
+    </select>
+    <select id="selectByIdNumberAndEpRecord" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM check_in_record
+        WHERE
+        id_number = #{idNumber}
+        AND ep_record_id = #{epRecordId}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+        delete from check_in_record
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="gradle.demo.model.CheckInRecord" >
+        insert into check_in_record (id, id_number_, user_id, 
+        ep_id, ep_record_id, time, create_date)
+        values (#{id, jdbcType=INTEGER}, #{idNumber,jdbcType=VARCHAR}, #{userId,jdbcType=INTEGER},
+        #{epId, jdbcType=INTEGER}, #{epRecordId,jdbcType=INTEGER},
+        sysdate() + '0', sysdate() + '0'
+        )
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="gradle.demo.model.CheckInRecord" >
+        update check_in_record
+        set id_number = #{idNumber, jdbcType=VARCHAR},
+        user_id = #{userId, jdbcType=INTEGER},
+        time = #{time, jdbcType=VARCHAR}
+        modify_date = sysdate() + '0'
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>
