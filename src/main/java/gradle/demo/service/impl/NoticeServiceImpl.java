@@ -14,15 +14,17 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Created by GJW on 2018/1/7.
+ * @author by GJW on 2018/1/7.
  */
 @Service
 public class NoticeServiceImpl implements NoticeService {
+
     @Autowired
     NoticeMapper noticeMapper;
 
     @Autowired
     UserService userService;
+
     @Override
     public Notice getById(Integer id) {
         return noticeMapper.selectByPrimaryKey(id);
@@ -30,7 +32,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public int update(Notice record) {
-        return noticeMapper.updateByPrimaryKeySelective(record);
+        return noticeMapper.updateByPrimaryKey(record);
     }
 
     @Override
@@ -47,56 +49,49 @@ public class NoticeServiceImpl implements NoticeService {
     @Override
     public List<Notice> getList(int offset, int limit) {
         List<Notice> notices = noticeMapper.getNoticeList(offset, limit);
-        if(CollectionUtils.isEmpty(notices)) {
+        if (CollectionUtils.isEmpty(notices)) {
             return Collections.emptyList();
         }
         return notices;
+    }
+
+
+    @Override
+    public List<NoticeDTO> getNoticeDTOList(int offset, int limit) {
+        List<Notice> notices = getList(offset, limit);
+        if (CollectionUtils.isEmpty(notices)) {
+            return Collections.emptyList();
+        }
+        List<NoticeDTO> dtos = Lists.newArrayList();
+        fillMessageNoticeDTO(notices, dtos);
+        return dtos;
     }
 
     @Override
-    public List<Notice> getMessageList(int userId, int offset, int limit) {
-        List<Notice> notices = noticeMapper.getMessageNoticeList(userId, offset, limit);
-        if(CollectionUtils.isEmpty(notices)) {
-            return Collections.emptyList();
-        }
-        return notices;
+    public NoticeDTO getNoticeDTO(Integer id) {
+        return notice2DTO(getById(id));
     }
 
-    public List<NoticeDTO> getNoticeDTO(int offset, int limit) {
-        List<Notice> notices = getList(offset, limit);
-        if(CollectionUtils.isEmpty(notices)) {
-            return Collections.emptyList();
-        }
-        List<NoticeDTO> dtos = Lists.newArrayList();
-        for(Notice notice : notices) {
-            NoticeDTO dto = new NoticeDTO();
-            dto.setId(notice.getId());
-            dto.setTitle(notice.getTitle());
-            dto.setContent(notice.getContent());
-            dto.setCreateTime(notice.getCreateTime());
-            dto.setCreateUserName(userService.getById(notice.getCreateId()).getName());
-            dto.setCreateId(notice.getCreateId());
-            dtos.add(dto);
-        }
-        return dtos;
+    @Override
+    public int countALlNumber() {
+        return noticeMapper.getAllNumber();
     }
 
-    public List<NoticeDTO> getMessageNoticeDTO(int userId, int offset, int limit) {
-        List<Notice> notices = getMessageList(userId, offset, limit);
-        if(CollectionUtils.isEmpty(notices)) {
-            return Collections.emptyList();
+
+    private void fillMessageNoticeDTO(List<Notice> notices, List<NoticeDTO> dtos) {
+        for (Notice notice : notices) {
+            dtos.add(notice2DTO(notice));
         }
-        List<NoticeDTO> dtos = Lists.newArrayList();
-        for(Notice notice : notices) {
-            NoticeDTO dto = new NoticeDTO();
-            dto.setId(notice.getId());
-            dto.setTitle(notice.getTitle());
-            dto.setContent(notice.getContent());
-            dto.setCreateTime(notice.getCreateTime());
-            dto.setCreateUserName(userService.getById(notice.getCreateId()).getName());
-            dto.setCreateId(notice.getCreateId());
-            dtos.add(dto);
-        }
-        return dtos;
+    }
+
+    private NoticeDTO notice2DTO(Notice notice) {
+        NoticeDTO dto = new NoticeDTO();
+        dto.setId(notice.getId());
+        dto.setTitle(notice.getTitle());
+        dto.setContent(notice.getContent());
+        dto.setCreateTime(notice.getCreateTime());
+        dto.setCreateUserName(userService.getById(notice.getCreateId()).getName());
+        dto.setCreateId(notice.getCreateId());
+        return dto;
     }
 }

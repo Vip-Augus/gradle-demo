@@ -18,9 +18,24 @@ public class CheckInRecord {
 
     private String time;
 
-    private Integer epId;
+    private Integer courseId;
 
-    private Integer epRecordId;
+    private Integer courseRecordId;
+
+    /**
+     * 课程名称
+     */
+    private String courseName;
+
+    /**
+     * 经度
+     */
+    private String longitude;
+
+    /**
+     * 纬度
+     */
+    private String latitude;
 
     private String createDate;
 

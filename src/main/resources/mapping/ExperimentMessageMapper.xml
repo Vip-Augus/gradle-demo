@@ -5,7 +5,7 @@
         <id column="id" property="id" jdbcType="INTEGER"/>
         <result column="to_id" property="toId" jdbcType="INTEGER"/>
         <result column="from_id" property="fromId" jdbcType="INTEGER"/>
-        <result column="ep_id" property="epId" jdbcType="INTEGER"/>
+        <result column="ep_id" property="courseId" jdbcType="INTEGER"/>
         <result column="title" property="title" jdbcType="VARCHAR"/>
         <result column="content" property="content" jdbcType="VARCHAR"/>
         <result column="created_date" property="createdDate" jdbcType="INTEGER"/>
@@ -31,7 +31,7 @@
         message
         (<include refid="insertFields"/>)
         VALUES
-        (#{fromId},#{toId},#{epId},#{title},#{content},#{hasRead},#{createdDate},#{conversationId})
+        (#{fromId},#{toId},#{courseId},#{title},#{content},#{hasRead},#{createdDate},#{conversationId})
     </insert>
 
     <insert id="batchInsert">
@@ -40,7 +40,7 @@
         (<include refid="insertFields"/>)
         VALUES
         <foreach collection="list" separator="," index="index" item="item">
-            (#{item.fromId},#{item.toId},#{item.epId},#{item.title},#{item.content},
+            (#{item.fromId},#{item.toId},#{item.courseId},#{item.title},#{item.content},
             #{item.hasRead},#{item.createdDate},#{item.conversationId})
         </foreach>
     </insert>

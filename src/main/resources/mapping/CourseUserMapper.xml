@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gradle.demo.dao.CourseUserMapper" >
+  <resultMap id="BaseResultMap" type="gradle.demo.model.CourseUser" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="course_id" property="courseId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="user_type" property="userType" jdbcType="INTEGER" />
+    <result column="create_date" property="createDate" jdbcType="VARCHAR" />
+    <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, course_id, user_id, user_type, create_date, modify_date
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from course_user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByUserId" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM course_user
+    WHERE user_id = #{userId, jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from course_user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="gradle.demo.model.CourseUser" >
+      <selectKey resultType="INTEGER" order="BEFORE" keyProperty="id">
+          SELECT gen_id('course_user') as id
+      </selectKey>
+    insert into course_user (id, course_id, user_id,
+      user_type, create_date)
+    values (#{id, jdbcType=INTEGER}, #{courseId,jdbcType=INTEGER},
+      #{userId,jdbcType=INTEGER}, #{userType, jdbcType=INTEGER},
+      sysdate() + '0')
+  </insert>
+    <insert id="batchInsert">
+      INSERT INTO course_user (id, course_id, user_id,
+      user_type, create_date) VALUES
+      <foreach collection="userIds" index="index" item="userId" separator=",">
+        (gen_id('course_user'), #{courseId, jdbcType=INTEGER},
+        #{userId, jdbcType=INTEGER}, #{userType, jdbcType=INTEGER}, sysdate() + '0')
+      </foreach>
+      on DUPLICATE key update
+      modify_date = sysdate() + '0'
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="gradle.demo.model.CourseUser" >
+    update course_user
+    set course_id = #{courseId,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=INTEGER},
+      modify_date = sysdate() + '0'
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectUserIdsByCId" resultType="java.lang.Integer">
+    SELECT user_id
+    FROM course_user
+    WHERE course_id = #{courseId}
+  </select>
+  <select id="selectCountByCId" resultType="int">
+    SELECT count(1)
+    FROM course_user
+    WHERE course_id = #{courseId}
+  </select>
+</mapper>

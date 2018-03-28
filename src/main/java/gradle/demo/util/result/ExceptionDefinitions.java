@@ -12,25 +12,35 @@ public class ExceptionDefinitions {
     /**
      * 重新登录
      */
-    public static final BusinessException LOGIN_AGAIN = new BusinessException("11111111", CodeConstants.LOGIN_AGAIN);
+    public static final ExceptionDefinition LOGIN_AGAIN = new ExceptionDefinition("11111111", CodeConstants.LOGIN_AGAIN);
 
     /**
      * 实验室已存在
      */
-    public static final BusinessException CLASSROOM_CONFLICT = new BusinessException("CL000001", "实验室已存在");
+    public static final ExceptionDefinition CLASSROOM_CONFLICT = new ExceptionDefinition("CL000001", "教室已存在");
 
     /**
      * 不在签到时间内
      */
-    public static final BusinessException NOT_IN_SIGN_TIME = new BusinessException("CL0000002", "不在签到时间内");
+    public static final ExceptionDefinition NOT_IN_SIGN_TIME = new ExceptionDefinition("CL0000002", "不在签到时间内");
 
     /**
      * 签到识别码错误
      */
-    public static final BusinessException CHECK_CODE_INCORRECT = new BusinessException("CL000003", "签到识别码错误");
+    public static final ExceptionDefinition CHECK_CODE_INCORRECT = new ExceptionDefinition("CL000003", "签到识别码错误");
 
     /**
      * 已经签到了
      */
-    public static final BusinessException HAVE_CHECK_IN = new BusinessException("CL000004", "已经签到了");
+    public static final ExceptionDefinition HAVE_CHECK_IN = new ExceptionDefinition("CL000004", "已经签到了");
+
+    /**
+     * 分页查询条件错误
+     */
+    public static final ExceptionDefinition INCORRECT_PAGE_PARAM = new ExceptionDefinition("GY000001", "分页参数不正确");
+
+    /**
+     * 文件后缀名不正确
+     */
+    public static final ExceptionDefinition INCORRECT_FILE_SUFFIX = new ExceptionDefinition("WJ000001", "文件后缀名不正确");
 }

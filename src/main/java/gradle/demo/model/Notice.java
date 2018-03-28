@@ -3,20 +3,16 @@ package gradle.demo.model;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @author yejingqi
+ */
 public class Notice implements Serializable {
-    private Integer id;
-
-    private String title;
-
-    private String content;
-
-    private Integer createId;
-
-    private Date createTime;
-
-    private Integer epId;
-
     private static final long serialVersionUID = 1L;
+    private Integer id;
+    private String title;
+    private String content;
+    private Integer createId;
+    private Date createTime;
 
     public Integer getId() {
         return id;
@@ -58,14 +54,6 @@ public class Notice implements Serializable {
         this.createTime = createTime;
     }
 
-    public Integer getEpId() {
-        return epId;
-    }
-
-    public void setEpId(Integer epId) {
-        this.epId = epId;
-    }
-
     @Override
     public boolean equals(Object that) {
         if (this == that) {
@@ -79,11 +67,10 @@ public class Notice implements Serializable {
         }
         Notice other = (Notice) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getTitle() == null ? other.getTitle() == null : this.getTitle().equals(other.getTitle()))
-            && (this.getContent() == null ? other.getContent() == null : this.getContent().equals(other.getContent()))
-            && (this.getCreateId() == null ? other.getCreateId() == null : this.getCreateId().equals(other.getCreateId()))
-            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-            && (this.getEpId() == null ? other.getEpId() == null : this.getEpId().equals(other.getEpId()));
+                && (this.getTitle() == null ? other.getTitle() == null : this.getTitle().equals(other.getTitle()))
+                && (this.getContent() == null ? other.getContent() == null : this.getContent().equals(other.getContent()))
+                && (this.getCreateId() == null ? other.getCreateId() == null : this.getCreateId().equals(other.getCreateId()))
+                && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()));
     }
 
     @Override
@@ -95,7 +82,6 @@ public class Notice implements Serializable {
         result = prime * result + ((getContent() == null) ? 0 : getContent().hashCode());
         result = prime * result + ((getCreateId() == null) ? 0 : getCreateId().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
-        result = prime * result + ((getEpId() == null) ? 0 : getEpId().hashCode());
         return result;
     }
 
@@ -110,7 +96,6 @@ public class Notice implements Serializable {
         sb.append(", content=").append(content);
         sb.append(", createId=").append(createId);
         sb.append(", createTime=").append(createTime);
-        sb.append(", epId=").append(epId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();

@@ -4,15 +4,24 @@ import java.io.InputStream;
 
 /**
  * 上传文件对象
- * Author JingQ on 2017/12/26.
+ * @author JingQ on 2017/12/26.
  */
 public class UploadObject {
 
-    private InputStream is;//上传文件流
+    /**
+     * 上传文件流
+     */
+    private InputStream is;
 
-    private String fullName;//文件名包含后缀，作为oss上传key
+    /**
+     * 文件名包含后缀，作为oss上传key
+     */
+    private String fullName;
 
-    private String dir;//Minio的上传目录
+    /**
+     * Minio的上传目录
+     */
+    private String dir;
 
     private String downloadName;
 

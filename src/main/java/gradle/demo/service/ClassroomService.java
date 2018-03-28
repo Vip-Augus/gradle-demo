@@ -2,7 +2,7 @@ package gradle.demo.service;
 
 import gradle.demo.base.BaseServiceTemplate;
 import gradle.demo.model.Classroom;
-import gradle.demo.model.Experiment;
+import gradle.demo.model.Course;
 import gradle.demo.model.dto.ClassroomQueryParam;
 import gradle.demo.model.enums.ClassTime;
 
@@ -28,7 +28,7 @@ public interface ClassroomService extends BaseServiceTemplate<Classroom>{
      * @param currentTime   当前时间
      * @return
      */
-    List<Experiment> getUsingStatement(Integer cid, String currentTime);
+    List<Course> getUsingStatement(Integer cid, String currentTime);
 
     /**
      * 某一间教室某天上的课时

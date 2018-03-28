@@ -38,34 +38,10 @@ public class AuthUtil {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-
-        ThreadPoolExecutor poolExecutor = (ThreadPoolExecutor) Executors.newCachedThreadPool(new ThreadFactory() {
-
-            @Override
-            public Thread newThread(@NotNull Runnable r) {
-                return new Thread(r, "当前线程哈希值是：" + r.hashCode());
-            }
-        });
-
-        //设定十个限制
-        CountDownLatch countDownLatch = new CountDownLatch(10);
-        TestService testService = new TestService(countDownLatch);
-
-        for (int i = 0; i < 10; i++){
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    testService.testMethod();
-                }
-            });
-            thread.setName("" + i);
-            poolExecutor.submit(thread);
-        }
-        //关闭线程池，等待池中的线程任务执行完毕
-        poolExecutor.shutdown();
-        System.out.println("poolExecutor分发任务结束: " + System.currentTimeMillis());
-        countDownLatch.await();
-        System.out.println("CountDown方法结束: " + System.currentTimeMillis());
+        String filePath = "/1/2/3/4/5/file.name";
+        int index = filePath.lastIndexOf(".");
+        String dir = filePath.substring(0, index);
+        String filrName = filePath.substring(index + 1, filePath.length());
     }
 
 

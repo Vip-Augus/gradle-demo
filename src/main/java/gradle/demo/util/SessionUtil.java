@@ -1,6 +1,8 @@
 package gradle.demo.util;
 
 import gradle.demo.model.User;
+import gradle.demo.util.result.BusinessException;
+import gradle.demo.util.result.ExceptionDefinitions;
 
 import javax.servlet.http.HttpSession;
 
@@ -16,12 +18,11 @@ public class SessionUtil {
      *
      * @param session 用户请求
      * @return 用户数据
-     * @throws Exception 用户没有登录
      */
-    public static User getUser(HttpSession session) throws Exception {
+    public static User getUser(HttpSession session) {
         User user = (User) session.getAttribute(CodeConstants.USER_INFO_CONSTANT);
         if (user == null) {
-            throw new Exception(CodeConstants.NULL_USER_INFO);
+            throw new BusinessException(ExceptionDefinitions.LOGIN_AGAIN);
         }
         return user;
     }

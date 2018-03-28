@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gradle.demo.dao.HomeworkMapper" >
+  <resultMap id="BaseResultMap" type="gradle.demo.model.Homework" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="homework_url" property="homeworkUrl" jdbcType="VARCHAR" />
+    <result column="mark_homework_url" property="markHomeworkUrl" jdbcType="VARBINARY"/>
+    <result column="homework_name" property="homeworkName" jdbcType="VARCHAR" />
+    <result column="upload_date" property="uploadDate" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="VARCHAR" />
+    <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
+    <result column="course_record_id" property="courseRecordId" jdbcType="INTEGER" />
+    <result column="id_number" property="idNumber" jdbcType="VARCHAR" />
+    <result column="course_id" property="courseId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="score" property="score" jdbcType="VARCHAR" />
+    <result column="comment" property="comment" jdbcType="VARCHAR" />
+    <result column="upload_name" property="uploadName" jdbcType="VARCHAR"/>
+
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, homework_url, mark_homework_url, homework_name,
+    upload_date, create_date, modify_date,
+    course_id, course_record_id, user_id, score,
+    upload_name, comment, id_number
+  </sql>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from homework
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByCRId" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM homework
+    WHERE course_record_id = #{courseRecordId, jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByCRIdAndUserId" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM homework
+    WHERE course_record_id = #{courseRecordId, jdbcType=INTEGER}
+    and user_id = #{userId, jdbcType=INTEGER}
+  </select>
+    <select id="selectHomeworkUrlsByCourseRecordId" resultType="string">
+      SELECT homework_url
+      FROM homework
+      WHERE course_record_id = #{courseRecordId, jdbcType=INTEGER}
+    </select>
+  <select id="selectByCIdAndUserId" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM homework
+    WHERE
+    course_id = #{courseId,jdbcType=INTEGER}
+    AND user_id = #{userId,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from homework
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="gradle.demo.model.Homework" >
+    <selectKey resultType="INTEGER" order="BEFORE" keyProperty="id">
+      SELECT gen_id('homework') as id
+    </selectKey>
+    insert into homework (id, homework_url, homework_name, 
+      upload_date, create_date,
+      course_id, course_record_id, user_id, id_number, score, comment, upload_name)
+    values (#{id, jdbcType=INTEGER}, #{homeworkUrl,jdbcType=VARCHAR}, #{homeworkName,jdbcType=VARCHAR},
+      sysdate() + '0', sysdate() + '0',
+      #{courseId,jdbcType=INTEGER}, #{courseRecordId,jdbcType=INTEGER}, #{userId, jdbcType=INTEGER}, #{idNumber, jdbcType=VARCHAR},
+      #{score, jdbcType=VARCHAR}, #{comment, jdbcType=VARCHAR}, #{uploadName, jdbcType=VARCHAR})
+    ON DUPLICATE KEY UPDATE
+    homework_url = #{homeworkUrl, jdbcType=VARCHAR},
+    modify_date = sysdate() + '0'
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="gradle.demo.model.Homework" >
+    update homework
+    set homework_url = #{homeworkUrl,jdbcType=VARCHAR},
+      homework_name = #{homeworkName,jdbcType=VARCHAR},
+      upload_date = #{uploadDate,jdbcType=VARCHAR},
+      modify_date = sysdate() + '0',
+      score = #{score, jdbcType=VARCHAR},
+      comment = #{comment, jdbcType=VARCHAR},
+      upload_name = #{uploadName, jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+    AND   user_id = #{userId, jdbcType=INTEGER}
+  </update>
+  <update id="markHomework">
+    UPDATE homework
+    SET
+    score = #{score, jdbcType=VARCHAR},
+    comment = #{comment, jdbcType=VARCHAR}
+    WHERE
+    id = #{id, jdbcType=INTEGER}
+  </update>
+  <update id="updateMarkHomework">
+    UPDATE homework
+    SET
+    mark_homework_url = #{url}
+    WHERE
+    id_number = #{idNumber, jdbcType=VARCHAR}
+    AND course_record_id = #{courseRecordId, jdbcType=INTEGER}
+  </update>
+</mapper>

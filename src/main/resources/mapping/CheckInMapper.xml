@@ -5,15 +5,19 @@
         <id column="id" property="id" jdbcType="INTEGER" />
         <result column="id_number" property="idNumber" jdbcType="VARCHAR" />
         <result column="user_id" property="userId" jdbcType="INTEGER" />
-        <result column="ep_id" property="epId" jdbcType="INTEGER" />
-        <result column="ep_record_id" property="epRecordId" jdbcType="INTEGER"/>
+        <result column="course_id" property="courseId" jdbcType="INTEGER" />
+        <result column="course_record_id" property="courseRecordId" jdbcType="INTEGER"/>
+        <result column="course_name" property="courseName" jdbcType="VARCHAR"/>
+        <result column="longitude" property="longitude" jdbcType="VARCHAR"/>
+        <result column="latitude" property="latitude" jdbcType="VARCHAR" />
         <result column="time" property="time" jdbcType="VARCHAR" />
         <result column="create_date" property="createDate" jdbcType="VARCHAR" />
         <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
     </resultMap>
     <sql id="Base_Column_List" >
-        id, id_number, user_id, ep_id,
-        ep_record_id, time, create_date, modify_date
+        id, id_number, user_id, course_id,
+        course_name, longitude, latitude,
+        course_record_id, time, create_date, modify_date
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
         select
@@ -21,33 +25,62 @@
         from check_in_record
         where id = #{id,jdbcType=INTEGER}
     </select>
-    <select id="selectByIdNumberAndEpRecordIds" resultMap="BaseResultMap">
+    <select id="selectByIdNumberAndCourseRecordIds" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM check_in_record
         WHERE id_number = #{idNumber, jdbcType=VARCHAR}
-        AND ep_record_id IN
-        <foreach collection="epRecordIds" item="epRecordId" index="index" open="(" separator="," close=")">
-            #{epRecordId, jdbcType=INTEGER}
+        AND course_record_id IN
+        <foreach collection="courseRecordIds" item="crId" index="index" open="(" separator="," close=")">
+            #{crId, jdbcType=INTEGER}
         </foreach>
     </select>
-    <select id="selectByIdNumberAndEpRecord" resultMap="BaseResultMap">
+    <select id="selectByIdNumberAndCourseRecord" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List" />
         FROM check_in_record
         WHERE
         id_number = #{idNumber}
-        AND ep_record_id = #{epRecordId}
+        AND course_record_id = #{courseRecordId}
+        ORDER BY create_date DESC
     </select>
+    <select id="selectByIdNumber" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM check_in_record
+        WHERE
+        id_number = #{idNumber}
+        ORDER BY create_date DESC
+    </select>
+
+    <select id="selectByCourseId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM check_in_record
+        WHERE
+        course_id = #{courseId, jdbcType=INTEGER}
+    </select>
+    <select id="selectByCourseRecordId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM check_in_record
+        WHERE
+        course_record_id = #{courseRecordId, jdbcType=INTEGER}
+        ORDER BY create_date DESC
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
         delete from check_in_record
         where id = #{id,jdbcType=INTEGER}
     </delete>
+
     <insert id="insert" parameterType="gradle.demo.model.CheckInRecord" >
-        insert into check_in_record (id, id_number_, user_id, 
-        ep_id, ep_record_id, time, create_date)
+        insert into check_in_record (id, id_number, user_id,
+        course_id, course_record_id, course_name,
+        longitude, latitude, time, create_date)
         values (#{id, jdbcType=INTEGER}, #{idNumber,jdbcType=VARCHAR}, #{userId,jdbcType=INTEGER},
-        #{epId, jdbcType=INTEGER}, #{epRecordId,jdbcType=INTEGER},
+        #{courseId, jdbcType=INTEGER}, #{courseRecordId,jdbcType=INTEGER},
+        #{courseName, jdbcType=VARCHAR}, #{longitude, jdbcType=VARCHAR}, #{latitude, jdbcType=VARCHAR},
         sysdate() + '0', sysdate() + '0'
         )
     </insert>

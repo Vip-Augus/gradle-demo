@@ -8,8 +8,10 @@ import gradle.demo.service.PubFileService;
 import gradle.demo.util.SessionUtil;
 import gradle.demo.util.convert.PubFileConverter;
 import gradle.demo.util.file.UploadObject;
+import gradle.demo.util.result.ApiResponse;
 import gradle.demo.util.result.BusinessException;
 import gradle.demo.util.result.ListResult;
+import gradle.demo.util.result.Message;
 import gradle.demo.util.result.SingleResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,7 +40,7 @@ import java.util.List;
  * @author JingQ on 2017/12/20.
  */
 @RestController
-@RequestMapping(value = "/web/file")
+@RequestMapping(value = "/class/file")
 @Api(value = "公共文件", tags = "Controller")
 public class FileController {
 
@@ -68,17 +70,10 @@ public class FileController {
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "公共文件上传", tags = "1.0.0")
-    public JSON upload(
+    public ApiResponse upload(
             @ApiParam(name = "file", value = "文件", type = "File", required = true) @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         SingleResult<Integer> result = new SingleResult<>();
-        User user;
-        try {
-            user = SessionUtil.getUser(request.getSession());
-        } catch (Exception e) {
-            LOGGER.error("用户未登录", e);
-            result.returnError("用户未登录");
-            return (JSON) JSON.toJSON(result);
-        }
+        User user = SessionUtil.getUser(request.getSession());
         if (!file.isEmpty()) {
             String fileName = file.getOriginalFilename();
             BufferedInputStream bis = null;
@@ -90,7 +85,7 @@ public class FileController {
             } catch (Exception ex) {
                 LOGGER.error("", ex);
                 result.returnError("上传失败!");
-                return (JSON) JSON.toJSON(result);
+                return ApiResponse.error(new Message("WJ000001", "上传文件失败"));
             } finally {
                 try {
                     if (bis != null) {
@@ -101,8 +96,7 @@ public class FileController {
                 }
             }
         }
-        result.returnSuccess(1);
-        return (JSON) JSON.toJSON(result);
+        return ApiResponse.success();
     }
 
     /**
@@ -114,7 +108,7 @@ public class FileController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "获取全部公共文件", tags = "1.0.0")
-    public JSON getAll(HttpServletRequest request) {
+    public ApiResponse getAll(HttpServletRequest request) {
         ListResult<PubFileDTO> result = new ListResult<>();
         try {
             List<PubFileDTO> pubFileDTOS = fileConverter.files2DTOs(pubFileServiceImpl.getList());
@@ -122,13 +116,13 @@ public class FileController {
         } catch (BusinessException e) {
             LOGGER.error("获取列表失败", e);
             result.returnError(e);
-            return (JSON) JSON.toJSON(result);
+            return ApiResponse.error(new Message("WJ000002", "获取文件列表失败"));
         } catch (Exception e) {
             LOGGER.error("获取列表失败", e);
             result.returnError("获取列表失败");
-            return (JSON) JSON.toJSON(result);
+            return ApiResponse.error(new Message("WJ000002", "获取文件列表失败"));
         }
-        return (JSON) JSON.toJSON(result);
+        return ApiResponse.success(result.getList());
     }
 
     /**

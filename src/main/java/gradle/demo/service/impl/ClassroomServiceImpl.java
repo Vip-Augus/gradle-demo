@@ -1,14 +1,14 @@
 package gradle.demo.service.impl;
 
 import gradle.demo.dao.ClassroomMapper;
+import gradle.demo.model.Course;
 import gradle.demo.util.result.ExceptionDefinitions;
 import gradle.demo.model.Classroom;
-import gradle.demo.model.Experiment;
 import gradle.demo.model.dto.ClassroomQueryParam;
 import gradle.demo.model.enums.ClassTime;
 import gradle.demo.model.enums.ClassroomStatus;
 import gradle.demo.service.ClassroomService;
-import gradle.demo.service.ExperimentService;
+import gradle.demo.service.CourseService;
 import gradle.demo.util.PeriodUtil;
 import gradle.demo.util.result.BusinessException;
 import com.google.common.collect.Lists;
@@ -28,7 +28,7 @@ public class ClassroomServiceImpl implements ClassroomService {
     private ClassroomMapper classroomMapper;
 
     @Autowired
-    private ExperimentService experimentServiceImpl;
+    private CourseService courseServiceImpl;
 
     @Override
     public Classroom getById(Integer id) {
@@ -84,8 +84,8 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     @Override
-    public List<Experiment> getUsingStatement(Integer cid, String currentTime) {
-        return experimentServiceImpl.getUsingStatementByCID(cid, null, currentTime);
+    public List<Course> getUsingStatement(Integer cid, String currentTime) {
+        return courseServiceImpl.getUsingStatementByCID(cid, null, currentTime);
     }
 
     @Override
@@ -94,10 +94,10 @@ public class ClassroomServiceImpl implements ClassroomService {
             return Lists.newArrayList();
         }
         //某一天该实验室所上的实验课
-        List<Experiment> experiments = experimentServiceImpl.getUsingStatementByCID(classroom.getId(), classTime.getCode(), currentPeriod);
+        List<Course> courses = courseServiceImpl.getUsingStatementByCID(classroom.getId(), classTime.getCode(), currentPeriod);
         List<Integer> usingTimes = Lists.newArrayList();
-        for (Experiment experiment : experiments) {
-            usingTimes.addAll(PeriodUtil.getSectionClass(experiment.getClassBegin(), experiment.getClassEnd()));
+        for (Course course : courses) {
+            usingTimes.addAll(PeriodUtil.getSectionClass(course.getClassBegin(), course.getClassEnd()));
         }
         return usingTimes;
     }

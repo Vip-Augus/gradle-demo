@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import gradle.demo.model.User;
 import gradle.demo.model.dto.UserDTO;
 import gradle.demo.model.dto.UserPageDTO;
-import gradle.demo.service.ExperimentUserService;
+import gradle.demo.service.CourseUserService;
 import gradle.demo.service.UserService;
 import gradle.demo.util.CodeConstants;
 import gradle.demo.util.ImportUtil;
@@ -13,6 +13,8 @@ import gradle.demo.util.SessionUtil;
 import gradle.demo.util.StringUtil;
 import gradle.demo.util.convert.UserConverter;
 import gradle.demo.util.result.ApiResponse;
+import gradle.demo.util.result.BusinessException;
+import gradle.demo.util.result.ExceptionDefinitions;
 import gradle.demo.util.result.Message;
 import gradle.demo.util.result.SingleResult;
 import com.google.common.collect.Lists;
@@ -44,7 +46,7 @@ import java.util.UUID;
  */
 @Slf4j
 @RestController
-@RequestMapping(value = "/web/user")
+@RequestMapping(value = "/class/user")
 @Api(value = "用户管理", tags = "Controller")
 public class UserController {
 
@@ -56,7 +58,7 @@ public class UserController {
     private UserConverter userConverter;
 
     @Autowired
-    private ExperimentUserService experimentUserServiceImpl;
+    private CourseUserService courseUserServiceImpl;
 
     @RequestMapping(value = "login", method = RequestMethod.POST)
     @ResponseBody
@@ -66,21 +68,18 @@ public class UserController {
             @ApiImplicitParam(value = "password", name = "密码", required = true, paramType = "String"),
             @ApiImplicitParam(value = "type", name = "用户类型", required = true, paramType = "Integer")
     })
-    public JSON login(@RequestBody User userParam, HttpServletRequest request) {
-        SingleResult<UserDTO> result = new SingleResult<>();
+    public ApiResponse<UserDTO> login(@RequestBody User userParam, HttpServletRequest request) {
         User user = userServiceImpl.getByIdNumber(userParam.getIdNumber(), userParam.getType());
         //校验用户信息
         if (user == null || !userServiceImpl.checkPassword(userParam, user)) {
-            result.returnError(CodeConstants.INVALID_USER_INFO);
             log.error(CodeConstants.INVALID_USER_INFO, userParam.getIdNumber());
-            return (JSON) JSON.toJSON(result);
+            throw new BusinessException(ExceptionDefinitions.LOGIN_AGAIN);
         }
         HttpSession session = request.getSession();
         //用户成功登录后，将数据存在session中，将密码清除掉
         UserDTO userDTO = userConverter.user2DTO(user);
         session.setAttribute(CodeConstants.USER_INFO_CONSTANT, user);
-        result.returnSuccess(userDTO);
-        return (JSON) JSON.toJSON(result);
+        return ApiResponse.success(userDTO);
     }
 
     @RequestMapping(value = "registry", method = RequestMethod.POST)

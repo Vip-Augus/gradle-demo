@@ -1,144 +1,95 @@
 package gradle.demo.model;
 
-import java.io.Serializable;
-import java.util.Date;
+import lombok.Data;
 
+import java.io.Serializable;
+
+/**
+ * 实验课信息
+ *
+ * @author JingQ on 2017/12/24.
+ */
+@Data
 public class Course implements Serializable {
+
+    private static final long serialVersionUID = -4725272480564053483L;
+
     private Integer id;
 
+    /**
+     * 课程名字
+     */
     private String name;
 
-    private String brief;
+    /**
+     * 简介
+     */
+    private String briefIntroduction;
 
-    private Integer period;
+    /**
+     * 冗余字段
+     */
+    private Integer classroomId;
 
-    private Integer test;
+    /**
+     * 开始学期---yyyy
+     */
+    private String beginPeriod;
 
-    private Integer createId;
+    /**
+     * 结束学期---yyyy
+     */
+    private String endPeriod;
 
-    private Date createDate;
+    /**
+     * 学期：1 上学期， 2 下学期
+     */
+    private Integer term;
 
-    private Date modifyDate;
+    /**
+     * 周几
+     */
+    private Integer day;
 
-    private static final long serialVersionUID = 1L;
+    /**
+     * 课时
+     */
+    private Integer lesson;
 
-    public Integer getId() {
-        return id;
-    }
+    /**
+     * 第几节课开始
+     */
+    private Integer classBegin;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    /**
+     * 第几节课下课
+     */
+    private Integer classEnd;
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * 教学楼号码
+     */
+    private Integer buildingNumber;
 
-    public void setName(String name) {
-        this.name = name == null ? null : name.trim();
-    }
+    /**
+     * 教室门牌
+     */
+    private String classroom;
 
-    public String getBrief() {
-        return brief;
-    }
+    /**
+     * 加入课程的识别码
+     */
+    private String code;
 
-    public void setBrief(String brief) {
-        this.brief = brief == null ? null : brief.trim();
-    }
+    /**
+     * 教师ID列表
+     */
+    private String tIds;
 
-    public Integer getPeriod() {
-        return period;
-    }
+    private String joinEndTime;
 
-    public void setPeriod(Integer period) {
-        this.period = period;
-    }
+    private String createDate;
 
-    public Integer getTest() {
-        return test;
-    }
+    private String modifyDate;
 
-    public void setTest(Integer test) {
-        this.test = test;
-    }
-
-    public Integer getCreateId() {
-        return createId;
-    }
-
-    public void setCreateId(Integer createId) {
-        this.createId = createId;
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
-    }
-
-    public Date getModifyDate() {
-        return modifyDate;
-    }
-
-    public void setModifyDate(Date modifyDate) {
-        this.modifyDate = modifyDate;
-    }
-
-    @Override
-    public boolean equals(Object that) {
-        if (this == that) {
-            return true;
-        }
-        if (that == null) {
-            return false;
-        }
-        if (getClass() != that.getClass()) {
-            return false;
-        }
-        Course other = (Course) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getName() == null ? other.getName() == null : this.getName().equals(other.getName()))
-            && (this.getBrief() == null ? other.getBrief() == null : this.getBrief().equals(other.getBrief()))
-            && (this.getPeriod() == null ? other.getPeriod() == null : this.getPeriod().equals(other.getPeriod()))
-            && (this.getTest() == null ? other.getTest() == null : this.getTest().equals(other.getTest()))
-            && (this.getCreateId() == null ? other.getCreateId() == null : this.getCreateId().equals(other.getCreateId()))
-            && (this.getCreateDate() == null ? other.getCreateDate() == null : this.getCreateDate().equals(other.getCreateDate()))
-            && (this.getModifyDate() == null ? other.getModifyDate() == null : this.getModifyDate().equals(other.getModifyDate()));
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
-        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
-        result = prime * result + ((getBrief() == null) ? 0 : getBrief().hashCode());
-        result = prime * result + ((getPeriod() == null) ? 0 : getPeriod().hashCode());
-        result = prime * result + ((getTest() == null) ? 0 : getTest().hashCode());
-        result = prime * result + ((getCreateId() == null) ? 0 : getCreateId().hashCode());
-        result = prime * result + ((getCreateDate() == null) ? 0 : getCreateDate().hashCode());
-        result = prime * result + ((getModifyDate() == null) ? 0 : getModifyDate().hashCode());
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", name=").append(name);
-        sb.append(", brief=").append(brief);
-        sb.append(", period=").append(period);
-        sb.append(", test=").append(test);
-        sb.append(", createId=").append(createId);
-        sb.append(", createDate=").append(createDate);
-        sb.append(", modifyDate=").append(modifyDate);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
 }

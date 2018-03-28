@@ -20,7 +20,8 @@ import java.io.InputStream;
 
 /**
  * 文件上传和下载服务
- * Author JingQ on 2017/12/25.
+ *
+ * @author JingQ on 2017/12/25.
  */
 @Service
 public class FileManageServiceImpl implements FileManageService {
@@ -28,116 +29,6 @@ public class FileManageServiceImpl implements FileManageService {
     private static Logger logger = LoggerFactory.getLogger(FileManageServiceImpl.class);
 
     private static MimetypesFileTypeMap mimetypesFileTypeMap;
-
-    @Autowired
-    private MinioConfigBean configBean;
-
-    @Resource(name = "minioGenericObjectPool")
-    private GenericObjectPool<MinioClient> genericObjectPool;
-
-    @Override
-    public String upload(UploadObject object) {
-        StringBuilder url = new StringBuilder();
-        MinioClient minioClient = null;
-        try {
-            minioClient = genericObjectPool.borrowObject();
-            byte[] bytes = IOUtils.toByteArray(object.getIs());
-            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-            String mimeType =  mimetypesFileTypeMap.getContentType(object.getFullName());
-            logger.info(">>>>>>>>>>>>>>>>>>>正在上传到Minio");
-            minioClient.putObject(configBean.getBucketName(), object.getDir() + object.getFullName(),bis, bytes.length, mimeType);
-            url.append(configBean.getStaticUrl()).append(object.getDir()).append(object.getFullName());
-            bis.close();
-            logger.info(">>>>>>>>>>>>>>>>>>>upload success>>>>" + url);
-        } catch (Exception e) {
-            logger.error("上传失败", e);
-        } finally {
-            try {
-                if (object.getIs() != null) {
-                    object.getIs().close();
-                }
-            } catch (Exception e) {
-                logger.error("输入流关闭失败", e);
-            }
-            genericObjectPool.returnObject(minioClient);
-        }
-        return url.toString();
-    }
-
-    @Override
-    public InputStream getInputStreamFromObject(UploadObject object) {
-        InputStream is;
-        MinioClient minioClient = null;
-        try {
-            minioClient = genericObjectPool.borrowObject();
-            logger.info(">>>>>>>>>>>>>>>>>>>正在下载");
-            minioClient.statObject(configBean.getBucketName(), object.getDir()+object.getFullName());
-            is = minioClient.getObject(configBean.getBucketName(), object.getDir()+object.getFullName());
-            logger.info(">>>>>>>>>>>>>>>>>>>下载成功" + object.getDir() + object.getFullName());
-        } catch (Exception e) {
-            logger.error("下载失败", e);
-            return null;
-        } finally {
-            try {
-                genericObjectPool.returnObject(minioClient);
-            } catch (Exception e) {
-                logger.error("归还失败");
-            }
-        }
-        return is;
-    }
-
-    @Override
-    public void deleteObject(String objectKey) {
-        MinioClient client = null;
-        try {
-            client = genericObjectPool.borrowObject();
-            client.removeObject(configBean.getBucketName(), objectKey);
-        } catch (Exception e) {
-            logger.error("Delete object failed. bucket="+configBean.getBucketName()+" key="+objectKey+", due to " + e.getMessage());
-        } finally {
-            genericObjectPool.returnObject(client);
-        }
-    }
-
-    @Override
-    public String upload(MultipartFile file, String dirPath) {
-        String url = null;
-        if (!file.isEmpty()) {
-            String fileName = file.getOriginalFilename();
-            BufferedInputStream bis = null;
-            try {
-                bis = new BufferedInputStream(file.getInputStream());
-                UploadObject object = new UploadObject(bis, fileName, dirPath);
-                url = upload(object);
-            } catch (Exception ex) {
-                logger.error("", ex);
-            } finally {
-                try {
-                    if (bis != null) {
-                        bis.close();
-                    }
-                } catch (Exception e) {
-                    logger.error("", e);
-                }
-            }
-        }
-        return url;
-    }
-
-
-    /**
-     * 判断Bucket是否创建--每次判断会耗时,所以直接创建好,不校验了
-     * @param client        minio
-     * @param bucketName    bucketName
-     * @throws Exception    异常
-     */
-    private void checkBucketExists(MinioClient client, String bucketName) throws Exception {
-        boolean result = client.bucketExists(bucketName);
-        if (!result) {
-            client.makeBucket(bucketName);
-        }
-    }
 
     static {
         mimetypesFileTypeMap = new MimetypesFileTypeMap();
@@ -193,6 +84,116 @@ public class FileManageServiceImpl implements FileManageService {
         mimetypesFileTypeMap.addMimeTypes("text/x-tex tex");
         mimetypesFileTypeMap.addMimeTypes("text/xml xml osm");
         mimetypesFileTypeMap.addMimeTypes("video/x-generic wmv mpeg mp4 ogv swf mov dvd osp");
+    }
+
+    @Autowired
+    private MinioConfigBean configBean;
+
+    @Resource(name = "minioGenericObjectPool")
+    private GenericObjectPool<MinioClient> genericObjectPool;
+
+    @Override
+    public String upload(UploadObject object) {
+        StringBuilder url = new StringBuilder();
+        MinioClient minioClient = null;
+        try {
+            minioClient = genericObjectPool.borrowObject();
+            byte[] bytes = IOUtils.toByteArray(object.getIs());
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+            String mimeType = mimetypesFileTypeMap.getContentType(object.getFullName());
+            logger.info(">>>>>>>>>>>>>>>>>>>正在上传到Minio");
+            minioClient.putObject(configBean.getBucketName(), object.getDir() + object.getFullName(), bis, bytes.length, mimeType);
+            url.append(configBean.getStaticUrl()).append(object.getDir()).append(object.getFullName());
+            bis.close();
+            logger.info(">>>>>>>>>>>>>>>>>>>upload success>>>>" + url);
+        } catch (Exception e) {
+            logger.error("上传失败", e);
+        } finally {
+            try {
+                if (object.getIs() != null) {
+                    object.getIs().close();
+                }
+            } catch (Exception e) {
+                logger.error("输入流关闭失败", e);
+            }
+            genericObjectPool.returnObject(minioClient);
+        }
+        return url.toString();
+    }
+
+    @Override
+    public InputStream getInputStreamFromObject(UploadObject object) {
+        InputStream is;
+        MinioClient minioClient = null;
+        try {
+            minioClient = genericObjectPool.borrowObject();
+            logger.info(">>>>>>>>>>>>>>>>>>>正在下载");
+            minioClient.statObject(configBean.getBucketName(), object.getDir() + object.getFullName());
+            is = minioClient.getObject(configBean.getBucketName(), object.getDir() + object.getFullName());
+            logger.info(">>>>>>>>>>>>>>>>>>>下载成功" + object.getDir() + object.getFullName());
+        } catch (Exception e) {
+            logger.error("下载失败", e);
+            return null;
+        } finally {
+            try {
+                genericObjectPool.returnObject(minioClient);
+            } catch (Exception e) {
+                logger.error("归还失败");
+            }
+        }
+        return is;
+    }
+
+    @Override
+    public void deleteObject(String objectKey) {
+        MinioClient client = null;
+        try {
+            client = genericObjectPool.borrowObject();
+            client.removeObject(configBean.getBucketName(), objectKey);
+        } catch (Exception e) {
+            logger.error("Delete object failed. bucket=" + configBean.getBucketName() + " key=" + objectKey + ", due to " + e.getMessage());
+        } finally {
+            genericObjectPool.returnObject(client);
+        }
+    }
+
+    @Override
+    public String upload(MultipartFile file, String dirPath) {
+        String url = null;
+        if (file != null && !file.isEmpty()) {
+            String fileName = file.getOriginalFilename();
+            BufferedInputStream bis = null;
+            try {
+                bis = new BufferedInputStream(file.getInputStream());
+                UploadObject object = new UploadObject(bis, fileName, dirPath);
+                url = upload(object);
+            } catch (Exception ex) {
+                logger.error("", ex);
+            } finally {
+                try {
+                    if (bis != null) {
+                        bis.close();
+                    }
+                } catch (Exception e) {
+                    logger.error("", e);
+                }
+            }
+        }
+        return url;
+    }
+
+    /**
+     * 判断Bucket是否创建--每次判断会耗时,所以直接创建好,不校验了
+     *
+     * @param client     minio
+     * @param bucketName bucketName
+     * @throws Exception 异常
+     */
+    private void checkBucketExists(MinioClient client, String bucketName) throws Exception {
+        boolean result = client.bucketExists(bucketName);
+        if (!result) {
+            client.makeBucket(bucketName);
+        }
     }
 
 }

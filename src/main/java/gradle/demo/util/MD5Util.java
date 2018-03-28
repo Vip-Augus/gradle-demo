@@ -11,7 +11,7 @@ public class MD5Util {
 
     private static final String SECURE_KEY = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    private static final int LEN_4 = 4;
+    private static final int LEN_6 = 6;
 
     //生成MD5
     public static String genMD5(String message) {
@@ -44,9 +44,9 @@ public class MD5Util {
         return hexStr.toString().toUpperCase();
     }
 
-    public static String getCheckCode() {
+    public static String getCheckCode(Integer keyLength) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < LEN_4; i++)
+        for (int i = 0; i < keyLength; i++)
         {
             int rand = (int) (Math.random() * SECURE_KEY.length());
             sb.append(SECURE_KEY.charAt(rand));

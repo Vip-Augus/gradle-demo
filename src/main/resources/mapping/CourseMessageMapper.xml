@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gradle.demo.dao.CourseMessageMapper">
+    <resultMap id="BaseResultMap" type="gradle.demo.model.CourseMessage">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="user_name" property="userName" jdbcType="VARCHAR"/>
+        <result column="id_number" property="idNumber" jdbcType="VARCHAR"/>
+        <result column="course_id" property="courseId" jdbcType="INTEGER"/>
+        <result column="publish_time" property="publishTime" jdbcType="VARCHAR"/>
+        <result column="create_date" property="createDate" jdbcType="VARCHAR"/>
+        <result column="modify_date" property="modifyDate" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, content, user_id, user_name, id_number,
+        publish_time, course_id, create_date, modify_date
+    </sql>
+
+    <insert id="insert" parameterType="gradle.demo.model.CourseMessage" >
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO
+        course_message(
+          id, content, user_id, user_name, id_number,
+        publish_time, course_id, create_date
+        ) VALUES (
+        #{id, jdbcType=INTEGER}, #{content, jdbcType=VARCHAR}, #{userId, jdbcType=INTEGER},
+        #{userName, jdbcType=VARCHAR}, #{idNumber, jdbcType=VARCHAR},
+        #{publishTime, jdbcType=VARCHAR}, #{courseId, jdbcType=INTEGER},
+        sysdate() + '0'
+        )
+    </insert>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM course_message
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByCourseId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM course_message
+        WHERE course_id = #{courseId, jdbcType=INTEGER}
+        ORDER BY create_date DESC
+    </select>
+    <select id="selectByParam" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM course_message
+        WHERE
+        course_id = #{courseId}
+        limit #{offset, jdbcType=INTEGER}, #{limit, jdbcType=INTEGER}
+    </select>
+
+    <update id="updateByPrimaryKey" parameterType="gradle.demo.model.CourseMessage">
+        UPDATE course_message
+        set content = #{content, jdbcType=VARCHAR},
+        publish_time = #{publishTime, jdbcType=VARCHAR},
+        modify_date = sysdate() + '0'
+        WHERE id = #{id, jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteByPrimaryKey">
+        DELETE FROM course_message
+        WHERE id = #{id, jdbcType=INTEGER}
+    </delete>
+</mapper>

@@ -1,8 +1,8 @@
 package gradle.demo.service.impl;
 
 import gradle.demo.dao.ScoreMapper;
-import gradle.demo.model.ExperimentDetail;
-import gradle.demo.model.ExperimentRecord;
+import gradle.demo.model.CourseRecord;
+import gradle.demo.model.Homework;
 import gradle.demo.model.Score;
 import gradle.demo.model.dto.ScoreDTO;
 import gradle.demo.service.*;
@@ -23,13 +23,13 @@ public class ScoreServiceImpl implements ScoreService {
     @Autowired
     ScoreMapper scoreMapper;
     @Autowired
-    ExperimentUserService experimentUserService;
+    CourseUserService courseUserService;
     @Autowired
     UserService userService;
     @Autowired
-    ExperimentDetailService experimentDetailService;
+    HomeworkService homeworkService;
     @Autowired
-    ExperimentRecordService experimentRecordService;
+    CourseRecordService courseRecordService;
     @Override
     public Score getById(Integer id) {
         return null;
@@ -83,10 +83,10 @@ public class ScoreServiceImpl implements ScoreService {
     public List<ScoreDTO> getByTeacherId(Integer teacherId, Integer limit) {
         List<ScoreDTO> scoreDTOList = new ArrayList<ScoreDTO>();
         List<Score> scoreList = new ArrayList<Score>();
-        List<Integer> epiDs = experimentUserService.getEPIDsByUserID(teacherId);
+        List<Integer> epiDs = courseUserService.getCIDsByUserID(teacherId);
         for(Integer epId: epiDs) {
-            List<ExperimentRecord> epRepords = experimentRecordService.getListByEPId(epId);
-            for (ExperimentRecord eprecord : epRepords) {
+            List<CourseRecord> epRepords = courseRecordService.getListByCourseId(epId);
+            for (CourseRecord eprecord : epRepords) {
                 scoreList.addAll(scoreMapper.selectByEpIdNoMark(eprecord.getId(), limit));
                 if(scoreList.size() >= limit) break;
             }
@@ -113,10 +113,10 @@ public class ScoreServiceImpl implements ScoreService {
             dto.setStudentId(studentId);
             dto.setIdNumber(userService.getById(studentId).getIdNumber());
             dto.setStudentName(userService.getById(studentId).getName());
-            List<ExperimentDetail> experimentDetailList = experimentDetailService.getDetailsByEPRecordId(score.getEprecordId(), studentId);
-            ExperimentDetail experimentDetail = experimentDetailList.get(experimentDetailList.size()-1);
-            dto.setEpFileUrl(experimentDetail.getEpFileUrl());
-            dto.setEpFileName(experimentDetail.getEpFileName());
+            List<Homework> homeworkList = homeworkService.getDetailsByCourseRecordId(score.getEprecordId(), studentId);
+            Homework homework = homeworkList.get(homeworkList.size()-1);
+            dto.setEpFileUrl(homework.getHomeworkUrl());
+            dto.setEpFileName(homework.getHomeworkName());
             dto.setScore(score.getScore());
             dto.setComment(score.getComment());
             dtos.add(dto);

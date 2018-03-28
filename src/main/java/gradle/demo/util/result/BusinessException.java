@@ -152,6 +152,7 @@ public class BusinessException extends RuntimeException {
 
     }
 
+    @Override
     public String getMessage() {
         return this.businessMessage != null?this.businessMessage.getMessage():null;
     }

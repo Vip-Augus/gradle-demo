@@ -2,10 +2,10 @@ package gradle.demo.controller;
 
 import com.alibaba.fastjson.JSON;
 import gradle.demo.model.Classroom;
-import gradle.demo.model.Experiment;
+import gradle.demo.model.Course;
 import gradle.demo.model.dto.ClassroomQueryParam;
 import gradle.demo.service.ClassroomService;
-import gradle.demo.service.ExperimentRecordService;
+import gradle.demo.service.CourseRecordService;
 import gradle.demo.util.PeriodUtil;
 import gradle.demo.util.result.BusinessException;
 import gradle.demo.util.result.ListResult;
@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -34,7 +33,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 @Api(value = "教室信息管理", tags = "Controller")
-@RequestMapping("/web/classroom")
+@RequestMapping("/class/classroom")
 public class ClassroomController {
 
     private static final String TIME_TEMPLATE = "yyyy-MM-dd";
@@ -45,7 +44,7 @@ public class ClassroomController {
     private ClassroomService classroomServiceImpl;
 
     @Autowired
-    private ExperimentRecordService experimentRecordServiceImpl;
+    private CourseRecordService courseRecordServiceImpl;
 
 
     @ApiOperation(value = "添加教室信息", tags = "1.0.0")
@@ -160,7 +159,7 @@ public class ClassroomController {
     @ApiOperation(value = "获取教室最近的课程信息", tags = "1.0.0")
     public JSON queryDetail(
             @ApiParam(name = "id", value = "教室ID", required = true, type = "Integer") @RequestParam("id") Integer id, HttpServletRequest request) {
-        ListResult<Experiment> result = new ListResult<>();
+        ListResult<Course> result = new ListResult<>();
         try {
             String currentTime = PeriodUtil.format(System.currentTimeMillis(), TIME_TEMPLATE);
             result.returnSuccess(classroomServiceImpl.getUsingStatement(id, currentTime));

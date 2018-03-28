@@ -1,135 +1,106 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="gradle.demo.dao.CourseMapper">
-  <resultMap id="BaseResultMap" type="gradle.demo.model.Course">
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="brief" jdbcType="VARCHAR" property="brief" />
-    <result column="period" jdbcType="INTEGER" property="period" />
-    <result column="test" jdbcType="INTEGER" property="test" />
-    <result column="create_id" jdbcType="INTEGER" property="createId" />
-    <result column="create_date" jdbcType="TIMESTAMP" property="createDate" />
-    <result column="modify_date" jdbcType="TIMESTAMP" property="modifyDate" />
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gradle.demo.dao.CourseMapper" >
+  <resultMap id="BaseResultMap" type="gradle.demo.model.Course" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="brief_introduction" property="briefIntroduction" jdbcType="VARCHAR" />
+    <result column="classroom_id" property="classroomId" jdbcType="INTEGER" />
+    <result column="begin_period" property="beginPeriod" jdbcType="VARCHAR" />
+    <result column="end_period" property="endPeriod" jdbcType="VARCHAR" />
+    <result column="lesson" property="lesson" jdbcType="INTEGER" />
+    <result column="term" property="term" jdbcType="INTEGER" />
+    <result column="building_number" property="buildingNumber" jdbcType="INTEGER" />
+    <result column="code" property="code" jdbcType="VARCHAR" />
+    <result column="classroom" property="classroom" jdbcType="VARCHAR" />
+    <result column="t_ids" property="tIds" jdbcType="VARCHAR" />
+    <result column="join_end_time" property="joinEndTime" jdbcType="VARCHAR" />
+    <result column="day" property="day" jdbcType="INTEGER" />
+    <result column="class_begin" property="classBegin" jdbcType="INTEGER" />
+    <result column="class_end" property="classEnd" jdbcType="INTEGER" />
+    <result column="create_date" property="createDate" jdbcType="VARCHAR" />
+    <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
   </resultMap>
-  <sql id="Base_Column_List">
-    id, name, brief, period, test, create_id, create_date, modify_date
+  <sql id="Base_Column_List" >
+    id, name, brief_introduction, classroom_id, begin_period, end_period, t_ids, join_end_time,
+    lesson, term, building_number, classroom, code,
+    day, class_begin, class_end, create_date, modify_date
   </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
     <include refid="Base_Column_List" />
     from course
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+  <select id="selectByIds" resultMap="BaseResultMap">
+    <if test="ids != null and ids.size() > 0">
+      SELECT
+      <include refid="Base_Column_List" />
+      FROM course
+      WHERE id in
+      <foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+        #{item}
+      </foreach>
+    </if>
+  </select>
+  <select id="selectInUseByClassroomId" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM course
+    WHERE classroom_id = #{classroomId, jdbcType=INTEGER}
+    <if test="currentTime != null">
+      AND
+      <![CDATA[
+    (begin_period <= #{currentTime} AND end_period >= #{currentTime})
+    ]]>
+    </if>
+    <if test="day != null">
+      AND
+      day = #{day, jdbcType=INTEGER}
+    </if>
+    ORDER BY day, class_begin
+  </select>
+  <select id="selectByCode" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List" />
+    FROM course
+    WHERE code = #{code, jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
     delete from course
     where id = #{id,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="gradle.demo.model.Course">
-    insert into course (id, name, brief, 
-      period, test, create_id, 
-      create_date, modify_date)
-    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{brief,jdbcType=VARCHAR}, 
-      #{period,jdbcType=INTEGER}, #{test,jdbcType=INTEGER}, #{createId,jdbcType=INTEGER}, 
-      #{createDate,jdbcType=TIMESTAMP}, #{modifyDate,jdbcType=TIMESTAMP})
+  <insert id="insert" parameterType="gradle.demo.model.Course" >
+    <selectKey resultType="INTEGER" order="BEFORE" keyProperty="id">
+      SELECT gen_id('course') as id
+    </selectKey>
+    insert into course (id, name, brief_introduction,
+      classroom_id, begin_period, end_period,
+      lesson, term, building_number, classroom, code,
+      t_ids, join_end_time, day, class_begin, class_end, create_date)
+    values (#{id, jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{briefIntroduction,jdbcType=VARCHAR},
+      #{classroomId,jdbcType=INTEGER}, #{beginPeriod,jdbcType=VARCHAR}, #{endPeriod,jdbcType=VARCHAR},
+      #{lesson, jdbcType=INTEGER}, #{term, jdbcType=INTEGER},
+      #{buildingNumber, jdbcType=INTEGER}, #{classroom, jdbcType=VARCHAR}, #{code, jdbcType=VARCHAR},
+      #{tIds,jdbcType=VARCHAR}, #{joinEndTime,jdbcType=VARCHAR},
+      #{day, jdbcType=INTEGER}, #{classBegin, jdbcType=INTEGER}, #{classEnd ,jdbcType=INTEGER}, sysdate() + '0')
   </insert>
-  <insert id="insertSelective" parameterType="gradle.demo.model.Course">
-    insert into course
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        id,
-      </if>
-      <if test="name != null">
-        name,
-      </if>
-      <if test="brief != null">
-        brief,
-      </if>
-      <if test="period != null">
-        period,
-      </if>
-      <if test="test != null">
-        test,
-      </if>
-      <if test="createId != null">
-        create_id,
-      </if>
-      <if test="createDate != null">
-        create_date,
-      </if>
-      <if test="modifyDate != null">
-        modify_date,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="id != null">
-        #{id,jdbcType=INTEGER},
-      </if>
-      <if test="name != null">
-        #{name,jdbcType=VARCHAR},
-      </if>
-      <if test="brief != null">
-        #{brief,jdbcType=VARCHAR},
-      </if>
-      <if test="period != null">
-        #{period,jdbcType=INTEGER},
-      </if>
-      <if test="test != null">
-        #{test,jdbcType=INTEGER},
-      </if>
-      <if test="createId != null">
-        #{createId,jdbcType=INTEGER},
-      </if>
-      <if test="createDate != null">
-        #{createDate,jdbcType=TIMESTAMP},
-      </if>
-      <if test="modifyDate != null">
-        #{modifyDate,jdbcType=TIMESTAMP},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="gradle.demo.model.Course">
-    update course
-    <set>
-      <if test="name != null">
-        name = #{name,jdbcType=VARCHAR},
-      </if>
-      <if test="brief != null">
-        brief = #{brief,jdbcType=VARCHAR},
-      </if>
-      <if test="period != null">
-        period = #{period,jdbcType=INTEGER},
-      </if>
-      <if test="test != null">
-        test = #{test,jdbcType=INTEGER},
-      </if>
-      <if test="createId != null">
-        create_id = #{createId,jdbcType=INTEGER},
-      </if>
-      <if test="createDate != null">
-        create_date = #{createDate,jdbcType=TIMESTAMP},
-      </if>
-      <if test="modifyDate != null">
-        modify_date = #{modifyDate,jdbcType=TIMESTAMP},
-      </if>
-    </set>
-    where id = #{id,jdbcType=INTEGER}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="gradle.demo.model.Course">
+  <update id="updateByPrimaryKey" parameterType="gradle.demo.model.Course" >
     update course
     set name = #{name,jdbcType=VARCHAR},
-      brief = #{brief,jdbcType=VARCHAR},
-      period = #{period,jdbcType=INTEGER},
-      test = #{test,jdbcType=INTEGER},
-      create_id = #{createId,jdbcType=INTEGER},
-      create_date = #{createDate,jdbcType=TIMESTAMP},
-      modify_date = #{modifyDate,jdbcType=TIMESTAMP}
+      brief_introduction = #{briefIntroduction,jdbcType=VARCHAR},
+      classroom_id = #{classroomId,jdbcType=INTEGER},
+      begin_period = #{beginPeriod,jdbcType=VARCHAR},
+      end_period = #{endPeriod,jdbcType=VARCHAR},
+      lesson = #{lesson,jdbcType=INTEGER},
+      term = #{term, jdbcType=INTEGER},
+      building_number = #{buildingNumber, jdbcType=INTEGER},
+      classroom = #{classroom, jdbcType=VARCHAR},
+      join_end_time = #{joinEndTime,jdbcType=VARCHAR},
+      day = #{day, jdbcType=INTEGER},
+      class_begin = #{classBegin, jdbcType=INTEGER},
+      class_end = #{classEnd, jdbcType=INTEGER},
+      modify_date = sysdate() + '0'
     where id = #{id,jdbcType=INTEGER}
   </update>
-
-  <select id="getList" resultType="gradle.demo.model.Course">
-    select
-    <include refid="Base_Column_List" />
-    from course
-    ORDER BY modify_date DESC
-  </select>
 </mapper>
