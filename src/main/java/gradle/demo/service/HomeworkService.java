@@ -16,20 +16,20 @@ public interface HomeworkService extends BaseServiceTemplate<Homework> {
     /**
      * 根据recordId和用户ID查询提交的作业(老师是看到所有学生, 学生只能看到自己的提交记录)
      *
-     * @param courseRecordId 课程记录ID
-     * @param userId         用户ID
+     * @param homeworkOuterId 作业外层ID
+     * @param userId          用户ID
      * @return 作业列表
      */
-    List<Homework> getDetailsByCourseRecordId(Integer courseRecordId, Integer userId);
+    List<Homework> getDetailsByHomeworkOuterId(Integer homeworkOuterId, Integer userId);
 
 
     /**
      * 课时作业链接
      *
-     * @param courseRecordId 课时ID
+     * @param homeworkOuterId 作业外层ID
      * @return 作业链接列表
      */
-    List<String> getHomeworkUrlsByCRID(Integer courseRecordId);
+    List<String> getHomeworkUrlsByHWOuterID(Integer homeworkOuterId);
 
     /**
      * 打分
@@ -42,11 +42,20 @@ public interface HomeworkService extends BaseServiceTemplate<Homework> {
     int markHomework(Integer id, String score, String comment);
 
     /**
+     * 批改学生作业
+     *
+     * @param id
+     * @param file
+     * @return
+     */
+    int markHomeworkUrl(Integer id, MultipartFile file);
+
+    /**
      * 更新老师批改结果
      *
-     * @param file           zip压缩包
-     * @param courseRecordId 课时ID
+     * @param file            zip压缩包
+     * @param homeworkOuterId 作业外层ID
      * @return 更新条数
      */
-    int markHomework(MultipartFile file, Integer courseRecordId) throws IOException;
+    int markHomework(MultipartFile file, Integer homeworkOuterId) throws IOException;
 }

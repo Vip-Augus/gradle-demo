@@ -3,10 +3,14 @@ package gradle.demo.service.impl;
 import gradle.demo.dao.HomeworkMapper;
 import gradle.demo.model.CourseRecord;
 import gradle.demo.model.Homework;
+import gradle.demo.model.HomeworkOuter;
 import gradle.demo.service.CourseRecordService;
 import gradle.demo.service.FileManageService;
+import gradle.demo.service.HomeworkOuterService;
 import gradle.demo.service.HomeworkService;
 import gradle.demo.util.file.UploadObject;
+import gradle.demo.util.result.BusinessException;
+import gradle.demo.util.result.ExceptionDefinitions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +39,7 @@ public class HomeworkServiceImpl implements HomeworkService {
     private HomeworkMapper homeworkMapper;
 
     @Autowired
-    private CourseRecordService courseRecordServiceImpl;
+    private HomeworkOuterService homeworkOuterServiceImpl;
 
     @Autowired
     private FileManageService fileManageServiceImpl;
@@ -62,16 +66,16 @@ public class HomeworkServiceImpl implements HomeworkService {
     }
 
     @Override
-    public List<Homework> getDetailsByCourseRecordId(Integer courseRecordId, Integer userId) {
+    public List<Homework> getDetailsByHomeworkOuterId(Integer homeworkOuterId, Integer userId) {
         if (userId == null) {
-            return homeworkMapper.selectByCRId(courseRecordId);
+            return homeworkMapper.selectByHWOuterId(homeworkOuterId);
         }
-        return homeworkMapper.selectByCRIdAndUserId(courseRecordId, userId);
+        return homeworkMapper.selectByHWOuterIdAndUserId(homeworkOuterId, userId);
     }
 
     @Override
-    public List<String> getHomeworkUrlsByCRID(Integer courseRecordId) {
-        return homeworkMapper.selectHomeworkUrlsByCourseRecordId(courseRecordId);
+    public List<String> getHomeworkUrlsByHWOuterID(Integer homeworkOuterId) {
+        return homeworkMapper.selectHomeworkUrlsByHWOuterId(homeworkOuterId);
     }
 
     @Override
@@ -80,9 +84,20 @@ public class HomeworkServiceImpl implements HomeworkService {
     }
 
     @Override
-    public int markHomework(MultipartFile file, Integer courseRecordId) throws IOException {
-        CourseRecord courseRecord = courseRecordServiceImpl.getById(courseRecordId);
-        String dirPath = MARK_HOMEWORK_DIR + courseRecord.getCourseName() + "_" + courseRecord.getCheckCode() + "/";
+    public int markHomeworkUrl(Integer id, MultipartFile file) {
+        Homework homework = homeworkMapper.selectByPrimaryKey(id);
+        if (homework == null) {
+            throw new BusinessException(ExceptionDefinitions.HOMEWORK_RECORD_NOT_EXIST);
+        }
+        String dirPath = MARK_HOMEWORK_DIR + homework.getHomeworkName() + "_" + homework.getCreateDate() + "/";
+        String url = fileManageServiceImpl.upload(file, dirPath);
+        return homeworkMapper.markHomeworkUrl(id, url);
+    }
+
+    @Override
+    public int markHomework(MultipartFile file, Integer homeworkOuterId) throws IOException {
+        HomeworkOuter homeworkOuter = homeworkOuterServiceImpl.getById(homeworkOuterId);
+        String dirPath = MARK_HOMEWORK_DIR + homeworkOuter.getHomeworkName() + "_" + homeworkOuter.getCreateDate() + "/";
         File tmpFile = new File("/usr/local/logs/" + file.getOriginalFilename());
         if (!tmpFile.exists()) {
             tmpFile.createNewFile();
@@ -102,10 +117,10 @@ public class HomeworkServiceImpl implements HomeworkService {
                 uploadObject.setIs(inputStream);
                 uploadObject.setFullName(fileName+"_批改");
                 String url = fileManageServiceImpl.upload(uploadObject);
-                homeworkMapper.updateMarkHomework(idNumber, courseRecordId, url);
+                homeworkMapper.updateMarkHomework(idNumber, homeworkOuterId, url);
             }
             zis.closeEntry();
-            log.info("作业解压成功，批改完成: " + courseRecord.getId());
+            log.info("作业解压成功，批改完成: " + homeworkOuter.getId());
         } catch (IOException e) {
             log.error("作业解压失败", e);
             throw new RuntimeException(e);

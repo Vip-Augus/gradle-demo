@@ -36,4 +36,21 @@ public interface CourseRecordService extends BaseServiceTemplate<CourseRecord> {
      * @return 记录
      */
     List<CourseRecordDTO> getByCourseIdAndUser(Integer courseId, User user);
+
+    /**
+     * 批量插入
+     *
+     * @param recordList
+     * @return
+     */
+    int batchAdd(List<CourseRecord> recordList);
+
+    /**
+     * 根据课程时间和课程ID获取课时
+     *
+     * @param classTime
+     * @param courseId
+     * @return
+     */
+    CourseRecord getByClassTimeAndCID(String classTime, Integer courseId);
 }

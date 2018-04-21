@@ -3,20 +3,26 @@ package gradle.demo.service.impl;
 import gradle.demo.dao.CourseMapper;
 import gradle.demo.model.Classroom;
 import gradle.demo.model.Course;
+import gradle.demo.model.CourseRecord;
 import gradle.demo.model.CourseUser;
 import gradle.demo.model.enums.ClassTime;
 import gradle.demo.model.enums.UserType;
 import gradle.demo.service.ClassroomService;
+import gradle.demo.service.CourseRecordService;
 import gradle.demo.service.CourseService;
 import gradle.demo.service.CourseUserService;
 import gradle.demo.util.MD5Util;
 import gradle.demo.util.PeriodUtil;
 import gradle.demo.util.result.BusinessException;
 import gradle.demo.util.result.ExceptionDefinition;
+import gradle.demo.util.result.ExceptionDefinitions;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,13 +32,18 @@ import java.util.List;
 @Service
 public class CourseServiceImpl implements CourseService {
 
-    private static final int SECURE_KEY_LENGTH = 6;
+    private static final String BEGIN_TIME_PATTERN = "yyyy-MM-dd";
+
+    private static final int SECURE_KEY_LENGTH = 4;
 
     @Autowired
     private CourseMapper courseMapper;
 
     @Autowired
     private CourseUserService courseUserServiceImpl;
+
+    @Autowired
+    private CourseRecordService courseRecordServiceImpl;
 
     @Autowired
     private ClassroomService classroomServiceImpl;
@@ -58,11 +69,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course add(Course record) {
-//        if (!isValid(record)) {
-//            BusinessException exception = new BusinessException(new ExceptionDefinition("0001111", "实验室地点被占用了,无法添加该课程"));
-//            log.error("实验室地点被占用", exception);
-//            throw exception;
-//        }
+        //校验时间
+        if (record.getDay() != PeriodUtil.getDayOfWeek(record.getBeginPeriod(), BEGIN_TIME_PATTERN)) {
+            throw new BusinessException(ExceptionDefinitions.INCORRECT_CLASS_TIME);
+        }
         //生成六位识别码
         String secureKey = MD5Util.getCheckCode(6);
         while (courseMapper.selectByCode(secureKey) != null) {
@@ -70,6 +80,25 @@ public class CourseServiceImpl implements CourseService {
         }
         record.setCode(secureKey);
         courseMapper.insert(record);
+
+        //添加对应的课时信息
+        Calendar calendar = Calendar.getInstance();
+        Date date = PeriodUtil.parse(record.getBeginPeriod(), BEGIN_TIME_PATTERN);
+        calendar.setTime(date);
+        calendar.add(Calendar.WEEK_OF_YEAR, -1);
+        List<CourseRecord> courseRecordList = Lists.newArrayList();
+        for (int i = 0; i < record.getLesson(); i++) {
+            CourseRecord courseRecord = new CourseRecord();
+            courseRecord.setCheckCode(MD5Util.getCheckCode(SECURE_KEY_LENGTH));
+            courseRecord.setCourseId(record.getId());
+            courseRecord.setCourseName(record.getName());
+            calendar.add(Calendar.WEEK_OF_YEAR, 1);
+            courseRecord.setClassTime(PeriodUtil.format(calendar.getTime(), BEGIN_TIME_PATTERN));
+            courseRecordList.add(courseRecord);
+        }
+        courseRecordServiceImpl.batchAdd(courseRecordList);
+
+        //绑定老师和课程的关系
         CourseUser courseUser = new CourseUser();
         courseUser.setCourseId(record.getId());
         courseUser.setUserId(Integer.valueOf(record.getTIds()));

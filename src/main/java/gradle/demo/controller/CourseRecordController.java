@@ -145,10 +145,10 @@ public class CourseRecordController {
     @ResponseBody
     @ApiOperation(value = "导出每次课堂记录的成绩", tags = "1.0.0")
     public void exportScore(
-            @ApiParam(name = "courseRecordId", value = "课程记录Id", type = "Integer", required = true) @RequestParam("courseRecordId") Integer courseRecordId, HttpServletResponse response) {
+            @ApiParam(name = "homeworkOuterId", value = "课程记录Id", type = "Integer", required = true) @RequestParam("homeworkOuterId") Integer courseRecordId, HttpServletResponse response) {
         CourseRecord record = courseRecordServiceImpl.getById(courseRecordId);
         try {
-            List<Homework> details = homeworkServiceImpl.getDetailsByCourseRecordId(courseRecordId, null);
+            List<Homework> details = homeworkServiceImpl.getDetailsByHomeworkOuterId(courseRecordId, null);
             response.setContentType("application/vnd.ms-excel");
             response.setHeader("Content-disposition", "attachment;fileName=" + URLEncoder.encode(record.getCourseName(), "UTF-8") + ".xls");
             HSSFWorkbook wb = export(details, record.getCourseName());

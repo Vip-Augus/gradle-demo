@@ -14,21 +14,21 @@ import java.util.List;
 public interface HomeworkMapper extends BaseMapperTemplate<Homework> {
 
     /**
-     * 根据每一次课时查找到学生提交记录---老师用,查询全部
+     * 根据每一次作业外层ID查找到学生提交记录---老师用,查询全部
      *
-     * @param courseRecordId 实验课记录ID
+     * @param homeworkOuterId 实验课记录ID
      * @return 学生提交记录
      */
-    List<Homework> selectByCRId(@Param("courseRecordId") Integer courseRecordId);
+    List<Homework> selectByHWOuterId(@Param("homeworkOuterId") Integer homeworkOuterId);
 
     /**
-     * 根据每一次课时查找到学生提交记录---学生用,查出学生个人的提交记录
+     * 根据每一次作业外层ID查找到学生提交记录---学生用,查出学生个人的提交记录
      *
-     * @param courseRecordId 实验课记录ID
-     * @param userId         学生ID
+     * @param homeworkOuterId 实验课记录ID
+     * @param userId          学生ID
      * @return 学生提交记录
      */
-    List<Homework> selectByCRIdAndUserId(@Param("courseRecordId") Integer courseRecordId, @Param("userId") Integer userId);
+    List<Homework> selectByHWOuterIdAndUserId(@Param("homeworkOuterId") Integer homeworkOuterId, @Param("userId") Integer userId);
 
     /**
      * 查询用户课程中所有作业
@@ -42,10 +42,10 @@ public interface HomeworkMapper extends BaseMapperTemplate<Homework> {
     /**
      * 查询作业链接
      *
-     * @param courseRecordId 课时ID
+     * @param homeworkOuterId 作业外层IDID
      * @return 作业链接列表
      */
-    List<String> selectHomeworkUrlsByCourseRecordId(@Param("courseRecordId") Integer courseRecordId);
+    List<String> selectHomeworkUrlsByHWOuterId(@Param("homeworkOuterId") Integer homeworkOuterId);
 
     /**
      * 打分
@@ -57,13 +57,22 @@ public interface HomeworkMapper extends BaseMapperTemplate<Homework> {
      */
     int markHomework(@Param("id") Integer id, @Param("score") String score, @Param("comment") String comment);
 
+
+    /**
+     * 根据主键ID更新批改作业
+     *
+     * @param id
+     * @param url
+     * @return
+     */
+    int markHomeworkUrl(@Param("id") Integer id, @Param("url") String url);
     /**
      * 更新老师批改作业
      *
-     * @param idNumber       学生学号
-     * @param courseRecordId 课时ID
-     * @param url            批改结果
+     * @param idNumber        学生学号
+     * @param homeworkOuterId 作业外层ID
+     * @param url             批改结果
      * @return 更新条数
      */
-    int updateMarkHomework(@Param("idNumber") String idNumber, @Param("courseRecordId") Integer courseRecordId, @Param("url") String url);
+    int updateMarkHomework(@Param("idNumber") String idNumber, @Param("homeworkOuterId") Integer homeworkOuterId, @Param("url") String url);
 }

@@ -33,7 +33,10 @@ public class Homework implements Serializable{
 
     private String modifyDate;
 
-    private Integer courseRecordId;
+    /**
+     * 与作业外层进行绑定
+     */
+    private Integer homeworkOuterId;
 
     private String score;
 

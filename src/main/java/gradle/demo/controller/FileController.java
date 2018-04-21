@@ -1,8 +1,10 @@
 package gradle.demo.controller;
 
 import com.alibaba.fastjson.JSON;
+import gradle.demo.model.Course;
 import gradle.demo.model.User;
 import gradle.demo.model.dto.PubFileDTO;
+import gradle.demo.service.CourseService;
 import gradle.demo.service.FileManageService;
 import gradle.demo.service.PubFileService;
 import gradle.demo.util.SessionUtil;
@@ -60,6 +62,9 @@ public class FileController {
     @Autowired
     private PubFileConverter fileConverter;
 
+    @Autowired
+    private CourseService courseServiceImpl;
+
     /**
      * 公共文件上传
      *
@@ -71,20 +76,25 @@ public class FileController {
     @ResponseBody
     @ApiOperation(value = "公共文件上传", tags = "1.0.0")
     public ApiResponse upload(
+            @ApiParam(name = "courseId", value = "课程ID", type = "Integer", required = true) @RequestParam("courseId") Integer courseId,
             @ApiParam(name = "file", value = "文件", type = "File", required = true) @RequestParam("file") MultipartFile file, HttpServletRequest request) {
-        SingleResult<Integer> result = new SingleResult<>();
         User user = SessionUtil.getUser(request.getSession());
+        Course course = courseServiceImpl.getById(courseId);
+        if (course == null) {
+            return ApiResponse.error(new Message("KC000001", "没有这门课"));
+        }
         if (!file.isEmpty()) {
             String fileName = file.getOriginalFilename();
             BufferedInputStream bis = null;
             try {
                 bis = new BufferedInputStream(file.getInputStream());
-                UploadObject object = new UploadObject(bis, fileName, BASE_PATH);
+                StringBuilder dirPath = new StringBuilder();
+                dirPath.append(BASE_PATH).append(course.getName()).append(course.getCode());
+                UploadObject object = new UploadObject(bis, fileName, dirPath.toString());
                 String url = fileManageService.upload(object);
-                pubFileServiceImpl.addPubFile(fileConverter.dto2DO(fillPubFile(fileName, url, user.getIdNumber(), user.getId())));
+                pubFileServiceImpl.addPubFile(fileConverter.dto2DO(fillPubFile(fileName, url, user.getIdNumber(), user.getId(), courseId)));
             } catch (Exception ex) {
                 LOGGER.error("", ex);
-                result.returnError("上传失败!");
                 return ApiResponse.error(new Message("WJ000001", "上传文件失败"));
             } finally {
                 try {
@@ -108,10 +118,12 @@ public class FileController {
     @RequestMapping(value = "/list", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "获取全部公共文件", tags = "1.0.0")
-    public ApiResponse getAll(HttpServletRequest request) {
+    public ApiResponse getAll(
+            @ApiParam(name = "courseId", value = "课程ID", type = "Integer", required = true) @RequestParam("courseId") Integer courseId,
+                    HttpServletRequest request) {
         ListResult<PubFileDTO> result = new ListResult<>();
         try {
-            List<PubFileDTO> pubFileDTOS = fileConverter.files2DTOs(pubFileServiceImpl.getList());
+            List<PubFileDTO> pubFileDTOS = fileConverter.files2DTOs(pubFileServiceImpl.getByCourseId(courseId));
             result.returnSuccess(pubFileDTOS);
         } catch (BusinessException e) {
             LOGGER.error("获取列表失败", e);
@@ -194,7 +206,7 @@ public class FileController {
         }
     }
 
-    private PubFileDTO fillPubFile(String fileName, String url, String idNumber, Integer userId) {
+    private PubFileDTO fillPubFile(String fileName, String url, String idNumber, Integer userId, Integer courseId) {
         PubFileDTO pubFile = new PubFileDTO();
         pubFile.setName(fileName);
         pubFile.setUploadDate(new Date());

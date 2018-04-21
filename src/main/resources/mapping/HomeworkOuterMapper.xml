@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="gradle.demo.dao.HomeworkOuterMapper" >
+    <resultMap id="BaseResultMap" type="gradle.demo.model.HomeworkOuter" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="homework_name" property="homeworkName" jdbcType="VARCHAR" />
+        <result column="homework_content" property="homeworkContent" jdbcType="VARCHAR"/>
+        <result column="create_id" property="createId" jdbcType="INTEGER" />
+        <result column="create_date" property="createDate" jdbcType="VARCHAR" />
+        <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
+        <result column="course_id" property="courseId" jdbcType="INTEGER" />
+
+    </resultMap>
+    <sql id="Base_Column_List" >
+        id, course_id, homework_name, homework_content,
+        create_id, create_date, modify_date
+    </sql>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />
+        from homework_outer
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="selectByCourseId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM homework_outer
+        WHERE course_id = #{courseId, jdbcType=INTEGER}
+    </select>
+
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+        delete from homework_outer
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insert" parameterType="gradle.demo.model.HomeworkOuter" >
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO
+        homework_outer (
+          id, homework_name, homework_content, course_id, create_date, create_id
+        ) VALUES (
+          #{id, jdbcType=INTEGER}, #{homeworkName, jdbcType=VARCHAR},
+          #{homeworkContent, jdbcType=VARCHAR}, #{courseId, jdbcType=INTEGER},
+          sysdate() + '0', #{createId, jdbcType=INTEGER}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="gradle.demo.model.HomeworkOuter" >
+        update homework_outer
+        set
+        homework_name = #{homeworkName,jdbcType=VARCHAR},
+        homework_content = #{homeworkContent, jdbcType=VARCHAR},
+        modify_date = sysdate() + '0',
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

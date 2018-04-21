@@ -1,19 +1,18 @@
 package gradle.demo.service.impl;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import gradle.demo.dao.CheckInMapper;
 import gradle.demo.dao.CourseRecordMapper;
 import gradle.demo.dao.HomeworkMapper;
 import gradle.demo.model.CheckInRecord;
 import gradle.demo.model.CourseRecord;
-import gradle.demo.model.Homework;
 import gradle.demo.model.User;
 import gradle.demo.model.dto.CourseRecordDTO;
 import gradle.demo.model.enums.UserType;
 import gradle.demo.service.CourseRecordService;
 import gradle.demo.service.CourseUserService;
 import gradle.demo.util.MD5Util;
+import gradle.demo.util.PeriodUtil;
 import gradle.demo.util.convert.CourseRecordConvert;
 import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,9 +41,6 @@ public class CourseRecordServiceImpl implements CourseRecordService {
 
     @Autowired
     private CheckInMapper checkInMapper;
-
-    @Autowired
-    private HomeworkMapper homeworkMapper;
 
     @Autowired
     private CourseRecordConvert courseRecordConvert;
@@ -85,7 +80,21 @@ public class CourseRecordServiceImpl implements CourseRecordService {
 
     @Override
     public List<CourseRecordDTO> getByCourseIdAndUser(Integer courseId, User user) {
-        List<CourseRecord> records = courseRecordMapper.selectByCId(courseId);
+        // 当前日期
+        String currentTime = PeriodUtil.format(System.currentTimeMillis(), "yyyy-MM-dd");
+        List<CourseRecord> tmpRecords = courseRecordMapper.selectByCId(courseId);
+
+        if (CollectionUtils.isEmpty(tmpRecords)) {
+            return Lists.newArrayList();
+        }
+        //过滤在当前日期之前的课时
+        List<CourseRecord> records = Lists.newArrayList();
+        for (CourseRecord courseRecord : tmpRecords) {
+            if (courseRecord.getClassTime().compareTo(currentTime) <= 0) {
+                records.add(courseRecord);
+            }
+        }
+
         List<CourseRecordDTO> result = courseRecordConvert.records2DTOS(records);
         if (!CollectionUtils.isEmpty(records)) {
             //学生处理逻辑
@@ -101,6 +110,19 @@ public class CourseRecordServiceImpl implements CourseRecordService {
         return result;
     }
 
+    @Override
+    public int batchAdd(List<CourseRecord> recordList) {
+        if (CollectionUtils.isEmpty(recordList)) {
+            return 0;
+        }
+        return courseRecordMapper.batchInsert(recordList);
+    }
+
+    @Override
+    public CourseRecord getByClassTimeAndCID(String classTime, Integer courseId) {
+        return courseRecordMapper.selectByClassTimeAndCID(classTime, courseId);
+    }
+
     private void getStudentRecords(List<CourseRecordDTO> result, User user, Integer courseId) {
         //学生签到记录
         List<CheckInRecord> checkInRecords = checkInMapper.selectByIdNumberAndCourseRecordIds(user.getIdNumber(), result.stream().map(CourseRecordDTO::getId).collect(Collectors.toList()));
@@ -108,24 +130,11 @@ public class CourseRecordServiceImpl implements CourseRecordService {
         if (!CollectionUtils.isEmpty(checkInRecords)) {
             courseRecordSet.addAll(checkInRecords.stream().map(CheckInRecord::getCourseRecordId).collect(Collectors.toSet()));
         }
-        List<Homework> homeworks = homeworkMapper.selectByCIdAndUserId(courseId, user.getId());
-        Map<Integer, Homework> homeworkMap = Maps.uniqueIndex(homeworks, new Function<Homework, Integer>() {
-            @Nullable
-            @Override
-            public Integer apply(@Nullable Homework input) {
-                return input.getCourseRecordId();
-            }
-        });
         for (CourseRecordDTO record : result) {
             if (courseRecordSet.contains(record.getId())) {
                 record.setIsCheckIn(true);
             } else {
                 record.setIsCheckIn(false);
-            }
-            Homework homework = homeworkMap.get(record.getId());
-            if (homework != null) {
-                record.setHomeworkUrl(homework.getHomeworkUrl());
-                record.setMarkHomeworkUrl(homework.getMarkHomeworkUrl());
             }
         }
     }

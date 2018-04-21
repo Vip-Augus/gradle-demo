@@ -11,7 +11,7 @@ import java.util.Date;
  * @author by JingQ on 2018/1/15
  */
 @Data
-public class PubFileDTO implements Serializable{
+public class PubFileDTO implements Serializable {
 
     private static final long serialVersionUID = -8818231204010181090L;
 
@@ -32,5 +32,10 @@ public class PubFileDTO implements Serializable{
     private String idNumber;
 
     private String parentPath;
+
+    /**
+     * 课程ID
+     */
+    private Integer courseId;
 
 }

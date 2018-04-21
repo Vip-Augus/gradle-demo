@@ -32,4 +32,11 @@ public interface PubFileService {
      * @return 全部公共文件
      */
     List<PubFile> getList();
+
+    /**
+     *
+     * @param courseId
+     * @return
+     */
+    List<PubFile> getByCourseId(Integer courseId);
 }

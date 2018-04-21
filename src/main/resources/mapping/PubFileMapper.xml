@@ -6,6 +6,7 @@
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="is_directory" jdbcType="TINYINT" property="isDirectory" />
     <result column="file_url" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="course_id" jdbcType="INTEGER" property="courseId" />
     <result column="create_id" jdbcType="INTEGER" property="createId" />
     <result column="upload_date" jdbcType="TIMESTAMP" property="uploadDate" />
     <result column="id_number" jdbcType="VARCHAR" property="idNumber" />
@@ -14,7 +15,8 @@
     <result column="modify_date" jdbcType="VARCHAR" property="modifyDate" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, name, is_directory, file_url, create_id, upload_date, id_number,
+    id, name, is_directory, file_url,
+    course_id, create_id, upload_date, id_number,
     parent_path, create_date, modify_date
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -28,17 +30,27 @@
     <include refid="Base_Column_List" />
     FROM pub_file
   </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+
+    <select id="selectByCourseId" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />
+      FROM pub_file
+      WHERE course_id = #{courseId, jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from pub_file
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="gradle.demo.model.PubFile">
     insert into pub_file ( name, is_directory,
-      file_url, create_id, id_number, upload_date, parent_path, create_date,
+      file_url, create_id, id_number,
+      course_id, upload_date, parent_path, create_date,
       modify_date)
     values (#{name,jdbcType=VARCHAR}, #{isDirectory,jdbcType=TINYINT},
       #{fileUrl,jdbcType=VARCHAR}, #{createId, jdbcType=INTEGER},
-      #{idNumber, jdbcType=VARCHAR}, #{uploadDate, jdbcType=TIMESTAMP},
+      #{idNumber, jdbcType=VARCHAR}, #{courseId, jdbcType=INTEGER},
+      #{uploadDate, jdbcType=TIMESTAMP},
       #{parentPath,jdbcType=VARCHAR}, #{createDate,jdbcType=VARCHAR},
       #{modifyDate,jdbcType=VARCHAR})
   </insert>
@@ -59,6 +71,9 @@
       </if>
       <if test="createId != null">
         create_id,
+      </if>
+      <if test="courseId != null">
+        course_id,
       </if>
       <if test="idNumber != null">
         id_number,
@@ -92,8 +107,11 @@
       <if test="createId != null">
         #{createId,jdbcType=VARCHAR},
       </if>
+      <if test="courseId != null">
+        #{courseId,jdbcType=INTEGER},
+      </if>
       <if test="idNumber != null">
-        idNumber,
+        #{idNumber,jdbcType=VARCHAR},
       </if>
       <if test="uploadDate != null">
         uploadDate,

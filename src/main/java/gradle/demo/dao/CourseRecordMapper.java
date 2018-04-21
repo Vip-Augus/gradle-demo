@@ -37,4 +37,21 @@ public interface CourseRecordMapper extends BaseMapperTemplate<CourseRecord> {
      * @return 更细记录
      */
     int updateCRFileUrl(@Param("id") Integer id, @Param("fileUrl") String fileUrl);
+
+    /**
+     * 批量插入课时
+     *
+     * @param recordList 课时记录
+     * @return
+     */
+    int batchInsert(@Param("list") List<CourseRecord> recordList);
+
+    /**
+     * 根据当前时间和课程ID进行课时查找
+     *
+     * @param classTime
+     * @param courseId
+     * @return
+     */
+    CourseRecord selectByClassTimeAndCID(@Param("classTime") String classTime, @Param("courseId") Integer courseId);
 }

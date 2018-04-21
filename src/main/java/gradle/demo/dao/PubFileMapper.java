@@ -2,6 +2,7 @@ package gradle.demo.dao;
 
 import gradle.demo.model.PubFile;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -66,4 +67,11 @@ public interface PubFileMapper {
      * @return 全部公共文件
      */
     List<PubFile> getAll();
+
+    /**
+     * 根据课程ID查找公共资源
+     *
+     * @return
+     */
+    List<PubFile> selectByCourseId(@Param("courseId") Integer courseId);
 }

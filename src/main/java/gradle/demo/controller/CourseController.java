@@ -96,7 +96,6 @@ public class CourseController {
             @ApiImplicitParam(name = "classEnd", value = "第几节结束", paramType = "Integer", allowableValues = "1-12"),
     })
     public ApiResponse add(@RequestBody Course course, HttpServletRequest request) {
-        SingleResult<Course> result = new SingleResult<>();
         User user = SessionUtil.getUser(request.getSession());
         //插入成功后，将老师id与课程绑定
         try {
@@ -104,11 +103,9 @@ public class CourseController {
             course = courseServiceImpl.add(course);
         } catch (Exception e) {
             log.error("创建课程失败", e);
-            result.returnError("创建课程失败");
             return ApiResponse.error(new Message("CO000001", "创建课程失败"));
         }
         log.info("课程创建成功: ", course.getId());
-        result.returnSuccess(course);
         return ApiResponse.success(course);
     }
 

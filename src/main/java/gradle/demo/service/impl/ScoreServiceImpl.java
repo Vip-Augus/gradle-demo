@@ -113,7 +113,7 @@ public class ScoreServiceImpl implements ScoreService {
             dto.setStudentId(studentId);
             dto.setIdNumber(userService.getById(studentId).getIdNumber());
             dto.setStudentName(userService.getById(studentId).getName());
-            List<Homework> homeworkList = homeworkService.getDetailsByCourseRecordId(score.getEprecordId(), studentId);
+            List<Homework> homeworkList = homeworkService.getDetailsByHomeworkOuterId(score.getEprecordId(), studentId);
             Homework homework = homeworkList.get(homeworkList.size()-1);
             dto.setEpFileUrl(homework.getHomeworkUrl());
             dto.setEpFileName(homework.getHomeworkName());

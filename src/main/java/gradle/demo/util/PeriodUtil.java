@@ -2,7 +2,9 @@ package gradle.demo.util;
 
 import com.google.common.collect.Lists;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.regex.Pattern;
 
 /**
  * 日期工具
- * Author JingQ on 2017/12/26.
+ * @author JingQ on 2017/12/26.
  */
 public class PeriodUtil {
 
@@ -81,6 +83,37 @@ public class PeriodUtil {
         return getSdf(pattern).format(time);
     }
 
+
+    public static Date parse(String time, String pattern) {
+        try {
+            return getSdf(pattern).parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 获取某天
+     *
+     * @param time
+     * @param pattern
+     * @return
+     */
+    public static int getDayOfWeek(String time, String pattern) {
+        Calendar calendar = Calendar.getInstance();
+        Date date = parse(time, pattern);
+        if (date == null) {
+            return 0;
+        }
+        calendar.setTime(date);
+        int day = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        if (day == 0) {
+            return 7;
+        }
+        return day;
+
+    }
     /**
      * 判断上课时间格式
      *

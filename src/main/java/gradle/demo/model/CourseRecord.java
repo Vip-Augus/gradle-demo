@@ -43,4 +43,9 @@ public class CourseRecord implements Serializable {
 
     private String modifyDate;
 
+    /**
+     * 上课时间
+     */
+    private String classTime;
+
 }

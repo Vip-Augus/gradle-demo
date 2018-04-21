@@ -49,13 +49,8 @@ public class CourseRecordDTO {
     private Integer checkCount;
 
     /**
-     * 学生提交的作业
+     * 上课时间 yyyy-MM-dd
      */
-    private String homeworkUrl;
-
-    /**
-     * 老师批改的作业
-     */
-    private String markHomeworkUrl;
+    private String classTime;
 
 }

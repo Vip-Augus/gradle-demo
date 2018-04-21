@@ -7,8 +7,10 @@ import gradle.demo.service.FileManageService;
 import gradle.demo.service.PubFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
@@ -53,6 +55,13 @@ public class PubFileServiceImpl implements PubFileService{
 
     @Override
     public List<PubFile> getList() {
-        return pubFileMapper.getAll();
+        List<PubFile> result = pubFileMapper.getAll();
+        return CollectionUtils.isEmpty(result) ? Lists.newArrayList() : result;
+    }
+
+    @Override
+    public List<PubFile> getByCourseId(Integer courseId) {
+        List<PubFile> result = pubFileMapper.selectByCourseId(courseId);
+        return CollectionUtils.isEmpty(result) ? Lists.newArrayList() : result;
     }
 }

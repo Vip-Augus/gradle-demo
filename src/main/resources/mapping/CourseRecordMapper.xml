@@ -7,6 +7,7 @@
         <result column="course_file_url" property="courseFileUrl" jdbcType="VARCHAR"/>
         <result column="course_id" property="courseId" jdbcType="INTEGER"/>
         <result column="date" property="date" jdbcType="VARCHAR"/>
+        <result column="class_time" property="classTime" jdbcType="VARCHAR"/>
         <result column="upload_end_time" property="uploadEndTime" jdbcType="VARCHAR"/>
         <result column="class_begin" property="classBegin" jdbcType="INTEGER"/>
         <result column="class_end" property="classEnd" jdbcType="INTEGER"/>
@@ -16,7 +17,8 @@
         <result column="modify_date" property="modifyDate" jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
-    id, course_name, course_file_url, course_id, date, upload_end_time, class_begin,
+    id, course_name, course_file_url, course_id, date,
+    class_time, upload_end_time, class_begin,
     class_end, classroom_id, check_code,
     create_date, modify_date
     </sql>
@@ -41,6 +43,15 @@
         ORDER BY
         date desc, class_begin
     </select>
+
+    <select id="selectByClassTimeAndCID" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM course_record
+        WHERE course_id = #{courseId, jdbcType=INTEGER}
+        AND class_time = #{classTime, jdbcType=VARCHAR}
+    </select>
+
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
         delete from course_record
         where id = #{id,jdbcType=INTEGER}
@@ -50,19 +61,39 @@
             SELECT gen_id('course_record') as id
         </selectKey>
         insert into course_record (id, course_name, course_file_url,
-        course_id, date, upload_end_time,
+        course_id, date, class_time, upload_end_time,
         class_begin, class_end, classroom_id,
         check_code, create_date)
         values (#{id, jdbcType=INTEGER}, #{courseName,jdbcType=VARCHAR}, #{courseFileUrl,jdbcType=VARCHAR},
-        #{courseId,jdbcType=INTEGER}, #{date,jdbcType=VARCHAR}, #{uploadEndTime,jdbcType=VARCHAR},
+        #{courseId,jdbcType=INTEGER}, #{date,jdbcType=VARCHAR},
+        #{classTime, jdbcType=VARCHAR}, #{uploadEndTime,jdbcType=VARCHAR},
         #{classBegin,jdbcType=INTEGER}, #{classEnd,jdbcType=INTEGER}, #{classroomId,jdbcType=INTEGER},
         #{checkCode, jdbcType=CHAR}, sysdate() + '0')
     </insert>
+
+    <insert id="batchInsert">
+      insert into course_record (id, course_name, course_file_url,
+        course_id, date, class_time, upload_end_time,
+        class_begin, class_end, classroom_id,
+        check_code, create_date)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (gen_id('course_record'), #{item.courseName,jdbcType=VARCHAR},
+            #{item.courseFileUrl,jdbcType=VARCHAR},
+            #{item.courseId,jdbcType=INTEGER}, #{item.date,jdbcType=VARCHAR},
+            #{item.classTime, jdbcType=VARCHAR}, #{item.uploadEndTime,jdbcType=VARCHAR},
+            #{item.classBegin,jdbcType=INTEGER}, #{item.classEnd,jdbcType=INTEGER},
+            #{item.classroomId,jdbcType=INTEGER},
+            #{item.checkCode, jdbcType=CHAR}, sysdate() + '0')
+        </foreach>
+    </insert>
+
     <update id="updateByPrimaryKey" parameterType="gradle.demo.model.CourseRecord">
     update course_record
     set course_name = #{courseName,jdbcType=VARCHAR},
       course_file_url = #{courseFileUrl,jdbcType=VARCHAR},
       date = #{date,jdbcType=VARCHAR},
+      class_time = #{classTime, jdbcType=VARCHAR},
       upload_end_time = #{uploadEndTime,jdbcType=VARCHAR},
       class_begin = #{classBegin,jdbcType=INTEGER},
       class_end = #{classEnd,jdbcType=INTEGER},

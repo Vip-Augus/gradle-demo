@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSON;
 import gradle.demo.config.MinioConfigBean;
 import gradle.demo.model.CourseRecord;
 import gradle.demo.model.Homework;
+import gradle.demo.model.HomeworkOuter;
 import gradle.demo.model.User;
 import gradle.demo.model.enums.UserType;
 import gradle.demo.service.CourseRecordService;
+import gradle.demo.service.HomeworkOuterService;
 import gradle.demo.service.HomeworkService;
 import gradle.demo.service.FileManageService;
 import gradle.demo.util.SessionUtil;
@@ -23,6 +25,7 @@ import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -60,7 +63,7 @@ public class HomeworkController {
     private HomeworkService homeworkServiceImpl;
 
     @Autowired
-    private CourseRecordService courseRecordServiceImpl;
+    private HomeworkOuterService homeworkOuterServiceImpl;
 
     @Autowired
     private MinioConfigBean minioConfigBean;
@@ -71,18 +74,22 @@ public class HomeworkController {
     @ApiOperation(value = "学生上传课时作业", tags = "1.0.0")
     public ApiResponse addRecord(
             @ApiParam(name = "courseId", value = "课程ID", required = true, type = "Integer") @RequestParam("courseId") Integer courseId,
-            @ApiParam(name = "courseRecordId", value = "课时ID", required = true, type = "Integer") @RequestParam("courseRecordId") Integer courseRecordId,
+            @ApiParam(name = "homeworkOuterId", value = "作业外层ID", required = true, type = "Integer") @RequestParam("homeworkOuterId") Integer homeworkOuterId,
             @ApiParam(name = "file", value = "作业", required = true, type = "file") @RequestParam("file") MultipartFile file, HttpServletRequest request) {
         User user = SessionUtil.getUser(request.getSession());
-        CourseRecord courseRecord = courseRecordServiceImpl.getById(courseRecordId);
+        //如果已经提交过作业
+        if (!CollectionUtils.isEmpty(homeworkServiceImpl.getDetailsByHomeworkOuterId(homeworkOuterId, user.getId()))) {
+            return ApiResponse.error(new Message("ZY0000001", "已经提交过，无需重新提交"));
+        }
+        HomeworkOuter homeworkOuter = homeworkOuterServiceImpl.getById(homeworkOuterId);
         String url;
         try {
-            url = fileManageServiceImpl.upload(file, BASE_DIR + courseRecord.getCourseName() + "_" + courseRecord.getCheckCode() + "/");
+            url = fileManageServiceImpl.upload(file, BASE_DIR + homeworkOuter.getHomeworkName() + "_" + homeworkOuter.getCreateDate() + "/");
         } catch (Exception e) {
             log.error("上传失败: ", e);
             return ApiResponse.error(new Message("ZY000001", e.getMessage()));
         }
-        Homework record = convertDetail(courseId, courseRecordId, user, url, file.getOriginalFilename());
+        Homework record = convertDetail(courseId, homeworkOuterId, user, url, file.getOriginalFilename());
         homeworkServiceImpl.add(record);
         log.info("上传成功: courseDetailId:", record.getId());
         return ApiResponse.success(record);
@@ -92,17 +99,17 @@ public class HomeworkController {
     @ApiOperation(value = "下载一个课时的全部作业", tags = "1.1.0")
     @ResponseBody
     public ApiResponse downloadHomeworkByCID(
-            @ApiParam(name = "courseRecordId", value = "课时ID") @RequestParam("courseRecordId") Integer courseRecordId,
+            @ApiParam(name = "homeworkOuterId", value = "作业外层ID") @RequestParam("homeworkOuterId") Integer homeworkOuterId,
             HttpServletResponse response) throws IOException {
-        CourseRecord courseRecord = courseRecordServiceImpl.getById(courseRecordId);
-        if (courseRecord == null) {
-            return ApiResponse.error(new Message("ZY0000005", "没有这个课时"));
+        HomeworkOuter homeworkOuter = homeworkOuterServiceImpl.getById(homeworkOuterId);
+        if (homeworkOuter == null) {
+            return ApiResponse.error(new Message("ZY0000005", "没有这个作业"));
         }
-        List<String> homeworkUrls = homeworkServiceImpl.getHomeworkUrlsByCRID(courseRecordId);
+        List<String> homeworkUrls = homeworkServiceImpl.getHomeworkUrlsByHWOuterID(homeworkOuterId);
         List<UploadObject> uploadObjects = convertFromUrls(homeworkUrls);
         response.setHeader("content-type", "application/octet-stream");
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(courseRecord.getCourseName() + ".zip", "utf-8"));
+        response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(homeworkOuter.getHomeworkName() + ".zip", "utf-8"));
         ZipOutputStream zos = new ZipOutputStream(response.getOutputStream());
         for (UploadObject uploadObject : uploadObjects) {
             InputStream inputStream = fileManageServiceImpl.getInputStreamFromObject(uploadObject);
@@ -139,7 +146,7 @@ public class HomeworkController {
     @ResponseBody
     @ApiOperation(value = "老师上传批改的zip包", tags = "1.1.0")
     public ApiResponse markHomework(
-            @ApiParam(name = "courseRecordId", value = "课时ID", type = "Integer", required = true) @RequestParam("courseRecordId") Integer courseRecordId,
+            @ApiParam(name = "homeworkOuterId", value = "课时ID", type = "Integer", required = true) @RequestParam("homeworkOuterId") Integer courseRecordId,
             @ApiParam(name = "file", value = "批改后的zip包", type = "file", required = true) @RequestParam("file") MultipartFile file) throws IOException {
         String fileOringinalName = file.getOriginalFilename();
         String fileSuffix = fileOringinalName.substring(fileOringinalName.lastIndexOf(".") + 1, fileOringinalName.length());
@@ -147,6 +154,18 @@ public class HomeworkController {
            throw new BusinessException(ExceptionDefinitions.INCORRECT_FILE_SUFFIX);
         }
         homeworkServiceImpl.markHomework(file, courseRecordId);
+        return ApiResponse.success();
+    }
+
+    @RequestMapping(value = "returnHomework", method = RequestMethod.POST)
+    @ApiOperation(value = "老师返回批改的作业", tags = "1.1.0")
+    public ApiResponse returnHomework(
+            @ApiParam(name = "id", value = "学生提交作业的ID", type = "Integer", readOnly = true) @RequestParam("id") Integer id,
+            @ApiParam(name = "file", value = "批改后作业", type = "file", readOnly = true) @RequestParam("file") MultipartFile file) {
+        if (id == 0 || file.isEmpty()) {
+            return ApiResponse.error(new Message("ZY000006", "返回作业格式不正确"));
+        }
+        homeworkServiceImpl.markHomeworkUrl(id, file);
         return ApiResponse.success();
     }
 
@@ -191,12 +210,12 @@ public class HomeworkController {
     @ResponseBody
     @ApiOperation(value = "获取作业列表", tags = "1.1.0")
     public ApiResponse queryListByEPId(
-            @ApiParam(name = "courseRecordId", value = "课时ID", required = true, type = "Integer") @RequestParam("courseRecordId") Integer courseRecordId,
+            @ApiParam(name = "homeworkOuterId", value = "课时ID", required = true, type = "Integer") @RequestParam("homeworkOuterId") Integer courseRecordId,
             HttpServletRequest request) {
         User user = SessionUtil.getUser(request.getSession());
         try {
             Integer userId = UserType.TEACHER.getCode().equals(user.getType()) ? null : user.getId();
-            List<Homework> homeworkList = homeworkServiceImpl.getDetailsByCourseRecordId(courseRecordId, userId);
+            List<Homework> homeworkList = homeworkServiceImpl.getDetailsByHomeworkOuterId(courseRecordId, userId);
             return ApiResponse.success(homeworkList);
         } catch (Exception e) {
             log.error("查询上传作业列表失败:", courseRecordId, e);
@@ -206,7 +225,7 @@ public class HomeworkController {
 
     private Homework convertDetail(Integer courseId, Integer courseRecordId, User user, String fileUrl, String fileName) {
         Homework detail = new Homework();
-        detail.setCourseRecordId(courseRecordId);
+        detail.setHomeworkOuterId(courseRecordId);
         detail.setCourseId(courseId);
         detail.setUserId(user.getId());
         detail.setHomeworkName(fileName);

@@ -9,7 +9,7 @@
     <result column="upload_date" property="uploadDate" jdbcType="VARCHAR" />
     <result column="create_date" property="createDate" jdbcType="VARCHAR" />
     <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
-    <result column="course_record_id" property="courseRecordId" jdbcType="INTEGER" />
+    <result column="homework_outer_id" property="homeworkOuterId" jdbcType="INTEGER" />
     <result column="id_number" property="idNumber" jdbcType="VARCHAR" />
     <result column="course_id" property="courseId" jdbcType="INTEGER" />
     <result column="user_id" property="userId" jdbcType="INTEGER" />
@@ -21,7 +21,7 @@
   <sql id="Base_Column_List" >
     id, homework_url, mark_homework_url, homework_name,
     upload_date, create_date, modify_date,
-    course_id, course_record_id, user_id, score,
+    course_id, homework_outer_id, user_id, score,
     upload_name, comment, id_number
   </sql>
 
@@ -32,24 +32,25 @@
     where id = #{id,jdbcType=INTEGER}
   </select>
 
-  <select id="selectByCRId" resultMap="BaseResultMap">
+  <select id="selectByHWOuterId" resultMap="BaseResultMap">
     SELECT
     <include refid="Base_Column_List" />
     FROM homework
-    WHERE course_record_id = #{courseRecordId, jdbcType=INTEGER}
+    WHERE homework_outer_id = #{homeworkOuterId, jdbcType=INTEGER}
+    ORDER BY score
   </select>
 
-  <select id="selectByCRIdAndUserId" resultMap="BaseResultMap">
+  <select id="selectByHWOuterIdAndUserId" resultMap="BaseResultMap">
     SELECT
     <include refid="Base_Column_List" />
     FROM homework
-    WHERE course_record_id = #{courseRecordId, jdbcType=INTEGER}
+    WHERE homework_outer_id = #{homeworkOuterId, jdbcType=INTEGER}
     and user_id = #{userId, jdbcType=INTEGER}
   </select>
-    <select id="selectHomeworkUrlsByCourseRecordId" resultType="string">
+    <select id="selectHomeworkUrlsByHWOuterId" resultType="string">
       SELECT homework_url
       FROM homework
-      WHERE course_record_id = #{courseRecordId, jdbcType=INTEGER}
+      WHERE homework_outer_id = #{homeworkOuterId, jdbcType=INTEGER}
     </select>
   <select id="selectByCIdAndUserId" resultMap="BaseResultMap">
     SELECT
@@ -71,10 +72,10 @@
     </selectKey>
     insert into homework (id, homework_url, homework_name, 
       upload_date, create_date,
-      course_id, course_record_id, user_id, id_number, score, comment, upload_name)
+      course_id, homework_outer_id, user_id, id_number, score, comment, upload_name)
     values (#{id, jdbcType=INTEGER}, #{homeworkUrl,jdbcType=VARCHAR}, #{homeworkName,jdbcType=VARCHAR},
       sysdate() + '0', sysdate() + '0',
-      #{courseId,jdbcType=INTEGER}, #{courseRecordId,jdbcType=INTEGER}, #{userId, jdbcType=INTEGER}, #{idNumber, jdbcType=VARCHAR},
+      #{courseId,jdbcType=INTEGER}, #{homeworkOuterId,jdbcType=INTEGER}, #{userId, jdbcType=INTEGER}, #{idNumber, jdbcType=VARCHAR},
       #{score, jdbcType=VARCHAR}, #{comment, jdbcType=VARCHAR}, #{uploadName, jdbcType=VARCHAR})
     ON DUPLICATE KEY UPDATE
     homework_url = #{homeworkUrl, jdbcType=VARCHAR},
@@ -97,7 +98,8 @@
     UPDATE homework
     SET
     score = #{score, jdbcType=VARCHAR},
-    comment = #{comment, jdbcType=VARCHAR}
+    comment = #{comment, jdbcType=VARCHAR},
+    modify_date = sysdate() + '0'
     WHERE
     id = #{id, jdbcType=INTEGER}
   </update>
@@ -107,6 +109,14 @@
     mark_homework_url = #{url}
     WHERE
     id_number = #{idNumber, jdbcType=VARCHAR}
-    AND course_record_id = #{courseRecordId, jdbcType=INTEGER}
+    AND homework_outer_id = #{homeworkOuterId, jdbcType=INTEGER}
+  </update>
+
+  <update id="markHomeworkUrl">
+    UPDATE homework
+    SET
+    mark_homework_url = #{url}
+    WHERE
+    id = #{id, jdbcType=INTEGER}
   </update>
 </mapper>

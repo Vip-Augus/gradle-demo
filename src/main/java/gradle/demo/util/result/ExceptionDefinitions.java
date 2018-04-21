@@ -35,6 +35,11 @@ public class ExceptionDefinitions {
     public static final ExceptionDefinition HAVE_CHECK_IN = new ExceptionDefinition("CL000004", "已经签到了");
 
     /**
+     * 填写的日期信息不正确
+     */
+    public static final ExceptionDefinition INCORRECT_CLASS_TIME = new ExceptionDefinition("CL000005", "填写的日期信息不正确");
+
+    /**
      * 分页查询条件错误
      */
     public static final ExceptionDefinition INCORRECT_PAGE_PARAM = new ExceptionDefinition("GY000001", "分页参数不正确");
@@ -43,4 +48,10 @@ public class ExceptionDefinitions {
      * 文件后缀名不正确
      */
     public static final ExceptionDefinition INCORRECT_FILE_SUFFIX = new ExceptionDefinition("WJ000001", "文件后缀名不正确");
+
+    /**
+     * 作业记录不存在
+     */
+    public static final ExceptionDefinition HOMEWORK_RECORD_NOT_EXIST = new ExceptionDefinition("ZY0000001", "作业记录不存在");
+
 }
