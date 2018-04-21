@@ -88,8 +88,9 @@ public class FileController {
             BufferedInputStream bis = null;
             try {
                 bis = new BufferedInputStream(file.getInputStream());
+                //文件基础路径
                 StringBuilder dirPath = new StringBuilder();
-                dirPath.append(BASE_PATH).append(course.getName()).append(course.getCode());
+                dirPath.append(BASE_PATH).append(course.getName()).append("_").append(course.getCode()).append("/");
                 UploadObject object = new UploadObject(bis, fileName, dirPath.toString());
                 String url = fileManageService.upload(object);
                 pubFileServiceImpl.addPubFile(fileConverter.dto2DO(fillPubFile(fileName, url, user.getIdNumber(), user.getId(), courseId)));
@@ -147,18 +148,15 @@ public class FileController {
     @RequestMapping(value = "/delete", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "删除某个公共文件", tags = "1.0.0")
-    public JSON delete(
+    public ApiResponse delete(
             @ApiParam(name = "id", value = "公共文件ID", type = "Integer", required = true) @RequestParam("id") Integer id, HttpServletRequest request) {
-        SingleResult<Integer> result = new SingleResult<>();
         try {
             pubFileServiceImpl.deletePubFileById(id);
-            result.returnSuccess(1);
         } catch (Exception e) {
             LOGGER.error("删除失败", e);
-            result.returnError("删除失败");
-            return (JSON) JSON.toJSON(result);
+            return ApiResponse.error(new Message("PF000001", e.getMessage()));
         }
-        return (JSON) JSON.toJSON(result);
+        return ApiResponse.success();
     }
 
     /**
@@ -213,6 +211,7 @@ public class FileController {
         pubFile.setIdNumber(idNumber);
         pubFile.setCreateId(userId);
         pubFile.setFileUrl(url);
+        pubFile.setCourseId(courseId);
         //先设一个默认值
         pubFile.setIsDirectory(0);
         return pubFile;

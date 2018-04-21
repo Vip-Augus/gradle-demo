@@ -49,7 +49,7 @@ public class PubFileServiceImpl implements PubFileService{
     @Override
     public void deletePubFileById(Integer id) {
         PubFile file = pubFileMapper.selectByPrimaryKey(id);
-        fileManageServiceImpl.deleteObject(StringUtils.replace(file.getFileUrl(), minioConfigBean.getIp(), ""));
+        fileManageServiceImpl.deleteObject(StringUtils.replace(file.getFileUrl(), minioConfigBean.getStaticUrl(), ""));
         pubFileMapper.deleteByPrimaryKey(id);
     }
 
