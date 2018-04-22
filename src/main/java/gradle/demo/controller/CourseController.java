@@ -203,7 +203,9 @@ public class CourseController {
         CourseUser cs = new CourseUser();
         cs.setUserType(user.getType());
         cs.setUserId(user.getId());
+        cs.setIdNumber(user.getIdNumber());
         cs.setCourseId(courseId);
+        cs.setUserName(user.getName());
         courseUserServiceImpl.add(cs);
         return ApiResponse.success();
     }
@@ -224,7 +226,7 @@ public class CourseController {
                 return user.getId();
             }
         });
-        result.returnSuccess(courseUserServiceImpl.batchAdd(epId, existUserIds));
+//        result.returnSuccess(courseUserServiceImpl.batchAdd(epId, existUserIds));
         return (JSON) JSON.toJSON(result);
     }
 

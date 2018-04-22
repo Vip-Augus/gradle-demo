@@ -21,6 +21,10 @@ public class CourseUser implements Serializable{
 
     private Integer userType;
 
+    private String idNumber;
+
+    private String userName;
+
     private String createDate;
 
     private String modifyDate;

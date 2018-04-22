@@ -1,23 +1,34 @@
 package gradle.demo.service.impl;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import gradle.demo.dao.CheckInMapper;
+import gradle.demo.dao.CourseUserMapper;
 import gradle.demo.model.CheckInRecord;
 import gradle.demo.model.Course;
 import gradle.demo.model.CourseRecord;
+import gradle.demo.model.CourseUser;
 import gradle.demo.model.User;
 import gradle.demo.model.enums.SignTime;
+import gradle.demo.model.enums.UserType;
 import gradle.demo.service.CheckInService;
 import gradle.demo.service.CourseRecordService;
 import gradle.demo.service.CourseService;
+import gradle.demo.service.CourseUserService;
 import gradle.demo.util.PeriodUtil;
 import gradle.demo.util.StringUtil;
 import gradle.demo.util.result.BusinessException;
 import gradle.demo.util.result.ExceptionDefinitions;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author by JingQ on 2018/3/14
@@ -30,6 +41,9 @@ public class CheckInServiceImpl implements CheckInService {
 
     @Autowired
     private CheckInMapper checkInMapper;
+
+    @Autowired
+    private CourseUserMapper courseUserMapper;
 
     @Autowired
     private CourseService courserServiceImpl;
@@ -92,7 +106,33 @@ public class CheckInServiceImpl implements CheckInService {
 
     @Override
     public List<CheckInRecord> getByCourseRecordId(Integer courseRecordId) {
-        return checkInMapper.selectByCourseRecordId(courseRecordId);
+        List<CourseUser> courseUsers = courseUserMapper.selectByCourseId(courseRecordId);
+        List<CheckInRecord> selectCheckInRecords = checkInMapper.selectByCourseRecordId(courseRecordId);
+        Map<Integer, CheckInRecord> checkUserMap = Maps.uniqueIndex(selectCheckInRecords, new Function<CheckInRecord, Integer>() {
+            @Nullable
+            @Override
+            public Integer apply(@Nullable CheckInRecord input) {
+                return input.getUserId();
+            }
+        });
+        List<CheckInRecord> result = Lists.newArrayList();
+        for (CourseUser courseUser : courseUsers) {
+            if (UserType.STUDENT.equals(UserType.fromCode(courseUser.getUserType()))) {
+                CheckInRecord record = checkUserMap.get(courseUser.getUserId());
+                //根据isCheck判断是否签到
+                if (record == null) {
+                    record = new CheckInRecord();
+                    record.setUserId(courseUser.getUserId());
+                    record.setIdNumber(courseUser.getIdNumber());
+                    record.setCourseRecordId(courseRecordId);
+                    record.setIsCheck(false);
+                } else {
+                    record.setIsCheck(true);
+                }
+                result.add(record);
+            }
+        }
+        return result;
     }
 
     @Override

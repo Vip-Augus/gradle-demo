@@ -78,7 +78,7 @@ public class CheckInController {
     @RequestMapping(value = "/getListByCourseRecordId", method = RequestMethod.GET)
     @ApiOperation(value = "获取签到列表", tags = "1.1.0")
     public ApiResponse getByIdNumberAndCourserRecordId(
-            @ApiParam(name = "homeworkOuterId", value = "课时Id", type = "Integer", required = true) @RequestParam("homeworkOuterId") Integer courseRecordId) {
+            @ApiParam(name = "courseRecordId", value = "课时Id", type = "Integer", required = true) @RequestParam("courseRecordId") Integer courseRecordId) {
         List<CheckInRecord> records = checkInServiceImpl.getByCourseRecordId(courseRecordId);
         return ApiResponse.success(records);
     }

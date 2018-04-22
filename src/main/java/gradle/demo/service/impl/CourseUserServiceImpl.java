@@ -60,10 +60,11 @@ public class CourseUserServiceImpl implements CourseUserService {
 
     @Override
     public int batchAdd(Integer courseId, List<Integer> userIds) {
+        //暂时不用
         if (CollectionUtils.isEmpty(userIds)) {
             return 0;
         }
-        return courseUserMapper.batchInsert(courseId, userIds);
+        return 0;
     }
 
     @Override
@@ -73,6 +74,15 @@ public class CourseUserServiceImpl implements CourseUserService {
             return Collections.emptyList();
         }
         return userIds;
+    }
+
+    @Override
+    public List<CourseUser> getByCourseId(Integer courseId) {
+        List<CourseUser> result = courseUserMapper.selectByCourseId(courseId);
+        if (CollectionUtils.isEmpty(result)) {
+            return Lists.newArrayList();
+        }
+        return result;
     }
 
     @Override

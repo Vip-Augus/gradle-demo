@@ -6,11 +6,14 @@
     <result column="course_id" property="courseId" jdbcType="INTEGER" />
     <result column="user_id" property="userId" jdbcType="INTEGER" />
     <result column="user_type" property="userType" jdbcType="INTEGER" />
+    <result column="id_number" property="idNumber" jdbcType="VARCHAR" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
     <result column="create_date" property="createDate" jdbcType="VARCHAR" />
     <result column="modify_date" property="modifyDate" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, course_id, user_id, user_type, create_date, modify_date
+     id, course_id, user_id, user_type, id_number,
+     user_name, create_date, modify_date
   </sql>
 
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
@@ -36,22 +39,13 @@
       <selectKey resultType="INTEGER" order="BEFORE" keyProperty="id">
           SELECT gen_id('course_user') as id
       </selectKey>
-    insert into course_user (id, course_id, user_id,
-      user_type, create_date)
+    insert into course_user (id, course_id, user_id, id_number,
+      user_name, user_type, create_date)
     values (#{id, jdbcType=INTEGER}, #{courseId,jdbcType=INTEGER},
-      #{userId,jdbcType=INTEGER}, #{userType, jdbcType=INTEGER},
-      sysdate() + '0')
+      #{userId,jdbcType=INTEGER}, #{idNumber, jdbcType=VARCHAR},
+      #{userName, jdbcType=VARCHAR},
+      #{userType, jdbcType=INTEGER}, sysdate() + '0')
   </insert>
-    <insert id="batchInsert">
-      INSERT INTO course_user (id, course_id, user_id,
-      user_type, create_date) VALUES
-      <foreach collection="userIds" index="index" item="userId" separator=",">
-        (gen_id('course_user'), #{courseId, jdbcType=INTEGER},
-        #{userId, jdbcType=INTEGER}, #{userType, jdbcType=INTEGER}, sysdate() + '0')
-      </foreach>
-      on DUPLICATE key update
-      modify_date = sysdate() + '0'
-    </insert>
 
     <update id="updateByPrimaryKey" parameterType="gradle.demo.model.CourseUser" >
     update course_user
@@ -71,4 +65,10 @@
     FROM course_user
     WHERE course_id = #{courseId}
   </select>
+    <select id="selectByCourseId" resultMap="BaseResultMap">
+      SELECT
+      <include refid="Base_Column_List"/>
+      FROM course_user
+      WHERE course_id = #{courseId, jdbcType=INTEGER}
+    </select>
 </mapper>

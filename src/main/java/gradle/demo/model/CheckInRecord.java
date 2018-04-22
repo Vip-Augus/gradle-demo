@@ -23,6 +23,11 @@ public class CheckInRecord {
     private Integer courseRecordId;
 
     /**
+     * 冗余字段，是否签到
+     */
+    private Boolean isCheck;
+
+    /**
      * 课程名称
      */
     private String courseName;

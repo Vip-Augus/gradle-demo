@@ -36,6 +36,14 @@ public interface CourseUserService extends BaseServiceTemplate<CourseUser> {
     List<Integer> getUserIdsByCId(Integer courseId);
 
     /**
+     * 根据课程ID获取用户列表
+     *
+     * @param courseId 课程ID
+     * @return 课程成员列表
+     */
+    List<CourseUser> getByCourseId(Integer courseId);
+
+    /**
      * 获取与这门课有关联的用户
      *
      * @param courseId 课程ID

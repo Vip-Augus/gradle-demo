@@ -5,14 +5,17 @@ import gradle.demo.model.Classroom;
 import gradle.demo.model.Course;
 import gradle.demo.model.CourseRecord;
 import gradle.demo.model.CourseUser;
+import gradle.demo.model.User;
 import gradle.demo.model.enums.ClassTime;
 import gradle.demo.model.enums.UserType;
 import gradle.demo.service.ClassroomService;
 import gradle.demo.service.CourseRecordService;
 import gradle.demo.service.CourseService;
 import gradle.demo.service.CourseUserService;
+import gradle.demo.service.UserService;
 import gradle.demo.util.MD5Util;
 import gradle.demo.util.PeriodUtil;
+import gradle.demo.util.SessionUtil;
 import gradle.demo.util.result.BusinessException;
 import gradle.demo.util.result.ExceptionDefinition;
 import gradle.demo.util.result.ExceptionDefinitions;
@@ -47,6 +50,9 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private ClassroomService classroomServiceImpl;
+
+    @Autowired
+    private UserService userServiceImpl;
 
 
     @Override
@@ -103,6 +109,9 @@ public class CourseServiceImpl implements CourseService {
         courseUser.setCourseId(record.getId());
         courseUser.setUserId(Integer.valueOf(record.getTIds()));
         courseUser.setUserType(UserType.TEACHER.getCode());
+        User user = userServiceImpl.getById(courseUser.getUserId());
+        courseUser.setIdNumber(user.getIdNumber());
+        courseUser.setUserName(user.getName());
         courseUserServiceImpl.add(courseUser);
         return record;
     }

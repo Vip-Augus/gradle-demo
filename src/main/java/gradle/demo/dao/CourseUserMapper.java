@@ -22,15 +22,6 @@ public interface CourseUserMapper extends BaseMapperTemplate<CourseUser> {
     List<CourseUser> selectByUserId(@Param("userId") Integer userId);
 
     /**
-     * 批量插入
-     *
-     * @param courseId 课程ID
-     * @param userIds  用户ID列表
-     * @return 插入的数量
-     */
-    int batchInsert(@Param("courseId") Integer courseId, @Param("userIds") List<Integer> userIds);
-
-    /**
      * 查询选修courseId的userId
      *
      * @param courseId 课程ID
@@ -45,4 +36,12 @@ public interface CourseUserMapper extends BaseMapperTemplate<CourseUser> {
      * @return 用户总数
      */
     int selectCountByCId(@Param("courseId") Integer courseId);
+
+    /**
+     * 查出该课程对应的用户列表
+     *
+     * @param courseId
+     * @return
+     */
+    List<CourseUser> selectByCourseId(@Param("courseId") Integer courseId);
 }
