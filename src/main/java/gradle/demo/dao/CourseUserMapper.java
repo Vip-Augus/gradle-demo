@@ -44,4 +44,12 @@ public interface CourseUserMapper extends BaseMapperTemplate<CourseUser> {
      * @return
      */
     List<CourseUser> selectByCourseId(@Param("courseId") Integer courseId);
+
+    /**
+     * 查询
+     * @param courseId
+     * @param userId
+     * @return
+     */
+    CourseUser selectByCourseIdAndUserId(@Param("courseId") Integer courseId, @Param("userId") Integer userId);
 }

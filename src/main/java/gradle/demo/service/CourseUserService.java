@@ -50,4 +50,13 @@ public interface CourseUserService extends BaseServiceTemplate<CourseUser> {
      * @return 用户总数
      */
     int getCourseCountByCId(Integer courseId);
+
+    /**
+     * 根据课程ID和用户ID进行查询
+     *
+     * @param courseId 课程ID
+     * @param userId   用户ID
+     * @return
+     */
+    CourseUser getByCourseIdAndUserId(Integer courseId, Integer userId);
 }

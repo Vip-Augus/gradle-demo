@@ -9,7 +9,7 @@ import java.security.MessageDigest;
  */
 public class MD5Util {
 
-    private static final String SECURE_KEY = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String SECURE_KEY = "0123456789";
 
     private static final int LEN_6 = 6;
 
@@ -17,17 +17,25 @@ public class MD5Util {
     public static String genMD5(String message) {
         String md5 = "";
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5"); // 创建一个md5算法对象
+            // 创建一个md5算法对象
+            MessageDigest md = MessageDigest.getInstance("MD5");
             byte[] messageByte = message.getBytes("UTF-8");
-            byte[] md5Byte = md.digest(messageByte); // 获得MD5字节数组,16*8=128位
-            md5 = bytesToHex(md5Byte); // 转换为16进制字符串
+            // 获得MD5字节数组,16*8=128位
+            byte[] md5Byte = md.digest(messageByte);
+            // 转换为16进制字符串
+            md5 = bytesToHex(md5Byte);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return md5;
     }
 
-    // 二进制转十六进制
+    /**
+     * 二进制转十六进制
+     *
+     * @param bytes
+     * @return
+     */
     public static String bytesToHex(byte[] bytes) {
         StringBuffer hexStr = new StringBuffer();
         int num;

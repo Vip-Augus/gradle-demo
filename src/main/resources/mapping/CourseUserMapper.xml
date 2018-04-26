@@ -71,4 +71,11 @@
       FROM course_user
       WHERE course_id = #{courseId, jdbcType=INTEGER}
     </select>
+    <select id="selectByCourseIdAndUserId" resultMap="BaseResultMap">
+      SELECT
+      <include refid="Base_Column_List"/>
+      FROM course_user
+      WHERE course_id = #{courseId, jdbcType=INTEGER}
+      AND user_id = #{userId, jdbcType=INTEGER}
+    </select>
 </mapper>

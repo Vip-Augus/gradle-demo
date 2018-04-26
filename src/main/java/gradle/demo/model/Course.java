@@ -86,6 +86,8 @@ public class Course implements Serializable {
      */
     private String tIds;
 
+    private String teacherName;
+
     private String joinEndTime;
 
     private String createDate;

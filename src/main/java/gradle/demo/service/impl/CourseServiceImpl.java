@@ -75,10 +75,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course add(Course record) {
-        //校验时间
-        if (record.getDay() != PeriodUtil.getDayOfWeek(record.getBeginPeriod(), BEGIN_TIME_PATTERN)) {
-            throw new BusinessException(ExceptionDefinitions.INCORRECT_CLASS_TIME);
-        }
+        //设置时间
+        record.setDay(PeriodUtil.getDayOfWeek(record.getBeginPeriod(), BEGIN_TIME_PATTERN));
         //生成六位识别码
         String secureKey = MD5Util.getCheckCode(6);
         while (courseMapper.selectByCode(secureKey) != null) {
@@ -128,7 +126,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course getByCode(String code) {
-        return courseMapper.selectByCode(code);
+        Course course = courseMapper.selectByCode(code);
+        User teacher = userServiceImpl.getById(Integer.valueOf(course.getTIds().split(",")[0]));
+        course.setTeacherName(teacher.getName());
+        return course;
     }
 
     /**

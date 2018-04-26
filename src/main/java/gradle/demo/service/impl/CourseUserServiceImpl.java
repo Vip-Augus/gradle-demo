@@ -89,4 +89,9 @@ public class CourseUserServiceImpl implements CourseUserService {
     public int getCourseCountByCId(Integer courseId) {
         return courseUserMapper.selectCountByCId(courseId);
     }
+
+    @Override
+    public CourseUser getByCourseIdAndUserId(Integer courseId, Integer userId) {
+        return courseUserMapper.selectByCourseIdAndUserId(courseId, userId);
+    }
 }

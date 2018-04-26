@@ -14,6 +14,7 @@ import gradle.demo.util.ImportUtil;
 import gradle.demo.util.SessionUtil;
 import gradle.demo.util.convert.CourseConverter;
 import gradle.demo.util.result.ApiResponse;
+import gradle.demo.util.result.Head;
 import gradle.demo.util.result.ListResult;
 import gradle.demo.util.result.Message;
 import gradle.demo.util.result.SingleResult;
@@ -201,6 +202,13 @@ public class CourseController {
             HttpServletRequest request) {
         User user = SessionUtil.getUser(request.getSession());
         CourseUser cs = new CourseUser();
+        CourseUser tmp = courseUserServiceImpl.getByCourseIdAndUserId(courseId, user.getId());
+        if (tmp != null) {
+            Head head = new Head();
+            head.setMsg("已经加入课程，不需要重复加入~");
+            ApiResponse response = new ApiResponse(head);
+            return response;
+        }
         cs.setUserType(user.getType());
         cs.setUserId(user.getId());
         cs.setIdNumber(user.getIdNumber());
