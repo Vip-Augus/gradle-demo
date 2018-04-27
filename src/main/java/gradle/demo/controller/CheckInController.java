@@ -51,14 +51,14 @@ public class CheckInController {
             @ApiParam(name = "code", value = "签到识别码", type = "String", required = true) @RequestParam("code") String code,
             HttpServletRequest request) {
         User user = SessionUtil.getUser(request.getSession());
-        CheckInRecord record = checkInServiceImpl.getByCourserRecordIdAndUserId(courseId, user.getIdNumber());
-        if (record != null) {
-            return ApiResponse.error(new Message("QD000003", "您已经签到，不需要再签了"));
-        }
         String currentTime = PeriodUtil.format(System.currentTimeMillis(), "yyyy-MM-dd");
         CourseRecord courseRecord = courseRecordService.getByClassTimeAndCID(currentTime, courseId);
         if (courseRecord == null) {
             return ApiResponse.error(new Message("QD000001", "不在签到时间内"));
+        }
+        CheckInRecord record = checkInServiceImpl.getByCourserRecordIdAndUserId(courseRecord.getId(), user.getIdNumber());
+        if (record != null) {
+            return ApiResponse.error(new Message("QD000003", "您已经签到，不需要再签了"));
         }
         if (!StringUtil.isEquals(courseRecord.getCheckCode(), code)) {
             return ApiResponse.error(new Message("QD000002", "识别码不正确"));

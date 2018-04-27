@@ -2,7 +2,6 @@ package gradle.demo.service.impl;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import gradle.demo.dao.CheckInMapper;
 import gradle.demo.dao.CourseUserMapper;
 import gradle.demo.model.CheckInRecord;
@@ -15,7 +14,6 @@ import gradle.demo.model.enums.UserType;
 import gradle.demo.service.CheckInService;
 import gradle.demo.service.CourseRecordService;
 import gradle.demo.service.CourseService;
-import gradle.demo.service.CourseUserService;
 import gradle.demo.util.PeriodUtil;
 import gradle.demo.util.StringUtil;
 import gradle.demo.util.result.BusinessException;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author by JingQ on 2018/3/14
@@ -49,7 +46,7 @@ public class CheckInServiceImpl implements CheckInService {
     private CourseService courserServiceImpl;
 
     @Autowired
-    private CourseRecordService courserRecordServiceImpl;
+    private CourseRecordService courseRecordServiceImpl;
 
     @Override
     public CheckInRecord getById(Integer id) {
@@ -84,7 +81,7 @@ public class CheckInServiceImpl implements CheckInService {
         if (SignTime.OTHER.equals(signTime) || !signTime.getCode().equals(course.getClassBegin())) {
             throw new BusinessException(ExceptionDefinitions.NOT_IN_SIGN_TIME);
         }
-        CourseRecord courserRecord = courserRecordServiceImpl.getById(courseRecordId);
+        CourseRecord courserRecord = courseRecordServiceImpl.getById(courseRecordId);
         //判断签到识别码
         if (StringUtil.isNullOrEmpty(checkCode) || !StringUtil.isEquals(checkCode, courserRecord.getCheckCode())) {
             throw new BusinessException(ExceptionDefinitions.CHECK_CODE_INCORRECT);
@@ -106,7 +103,11 @@ public class CheckInServiceImpl implements CheckInService {
 
     @Override
     public List<CheckInRecord> getByCourseRecordId(Integer courseRecordId) {
-        List<CourseUser> courseUsers = courseUserMapper.selectByCourseId(courseRecordId);
+        CourseRecord courseRecord = courseRecordServiceImpl.getById(courseRecordId);
+        if (courseRecord == null) {
+            throw new BusinessException("QD0000002", "没有这门课时");
+        }
+        List<CourseUser> courseUsers = courseUserMapper.selectByCourseId(courseRecord.getCourseId());
         List<CheckInRecord> selectCheckInRecords = checkInMapper.selectByCourseRecordId(courseRecordId);
         Map<Integer, CheckInRecord> checkUserMap = Maps.uniqueIndex(selectCheckInRecords, new Function<CheckInRecord, Integer>() {
             @Nullable
