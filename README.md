@@ -3,7 +3,7 @@
 ## 用于毕设后端作品
 
 ## 使用Minio进行文件上传和下载
-![Minio](http://oo5aasoph.bkt.clouddn.com/minio%E4%B8%BB%E7%95%8C%E9%9D%A2.png)
+![Minio](https://github.com/Vip-Augus/gradle-demo/blob/master/src/main/resources/minio%E4%B8%BB%E7%95%8C%E9%9D%A2.png)
 
 **Minio是一款跨平台的可「自建」轻量级对象存储服务，只需要一个命令，就能实现可以通过浏览器访问的简易网盘功能。支持本地储存和 AWS S3，最大存储对象 5TB。提供 API 与 SDK，可以和很多服务整合，甚至可以整合到 Android 与 iOS 应用中，使用 Apache License 2.0 协议发布。**
 
